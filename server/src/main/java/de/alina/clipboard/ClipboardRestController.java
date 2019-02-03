@@ -1,6 +1,8 @@
 package de.alina.clipboard;
 
+import de.alina.clipboard.exception.PersistenceException;
 import de.alina.clipboard.exception.UnauthorizedException;
+import de.alina.clipboard.model.ContentMessage;
 import de.alina.clipboard.model.User;
 import de.alina.clipboard.repo.DataManager;
 import de.alina.clipboard.repo.IDataManager;
@@ -10,6 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
@@ -27,6 +32,9 @@ public class ClipboardRestController {
         super();
         this.database = database;
     }
+
+    @Autowired
+    private SimpMessagingTemplate msgTemplate;
 
     /**
      * returns an QR image which contains an id for user authentication. The user scans
@@ -71,16 +79,22 @@ public class ClipboardRestController {
      */
     @RequestMapping(value = "/send-data", method = RequestMethod.POST)
     public String sendData(@RequestHeader(value = "id") String id,
-                           @RequestHeader(value = "data") String data) {
+                                   @RequestHeader(value = "data") String data) {
         if (isInputInvalid(id)) {
             throw new UnauthorizedException();
         }
         User user = new User();
         user.id = UUID.fromString(id);
         user.stringData = data;
-        database.saveStringData(user);
-        // TODO return value
-        return "sucessfull";
+        try {
+            database.saveStringData(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // TODO add this to every database call
+            throw new PersistenceException();
+        }
+        msgTemplate.convertAndSend("/topic/data-received", data);
+        return "successful";
     }
 
     /**

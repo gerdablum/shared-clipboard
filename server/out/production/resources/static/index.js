@@ -13,9 +13,11 @@ $(document).ready(function() {
         i.alt = 'QR Code zum scannen';
         $('#image-container').append(i);
         $('#text').append(data.id);
-        //TODO does not work
+        //TODO does not work ??
         var now = new Date();
         var inTenMinutes = new Date(now.getTime() + 10* 60000);
+        //TODO only set cookie if user actually scanned the qr code with smartphone
         document.cookie = "clipboard.id= " + data.id +"; expires=" + inTenMinutes.toUTCString();
     });
 });
+
