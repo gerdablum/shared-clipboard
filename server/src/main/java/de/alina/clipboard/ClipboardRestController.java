@@ -1,8 +1,8 @@
 package de.alina.clipboard;
 
+import de.alina.clipboard.exception.WebSocketException;
 import de.alina.clipboard.exception.PersistenceException;
 import de.alina.clipboard.exception.UnauthorizedException;
-import de.alina.clipboard.model.ContentMessage;
 import de.alina.clipboard.model.User;
 import de.alina.clipboard.repo.DataManager;
 import de.alina.clipboard.repo.IDataManager;
@@ -12,10 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.HtmlUtils;
 
 import java.io.*;
 import java.util.UUID;
@@ -37,6 +36,28 @@ public class ClipboardRestController {
     private SimpMessagingTemplate msgTemplate;
 
     /**
+     * This call is made from the smartphone to let the server know that it successfully saved the users id.
+     * The server then triggers a web socket call to let the client know the authorization is complete.
+     * @param id the id scanned with the smartphone
+     * @return
+     */
+    @RequestMapping(value = "/acknowledge")
+    public String acknowledgeId(@RequestParam(value = "id") String id) {
+        id = HtmlUtils.htmlEscape(id);
+        if (isInputInvalid(id)) {
+            throw new UnauthorizedException();
+        }
+        try {
+            msgTemplate.convertAndSend("/topic/acknowledge/" + id, "acknowledged");
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new WebSocketException();
+        }
+
+        return "successful";
+    }
+
+    /**
      * returns an QR image which contains an id for user authentication. The user scans
      * the QR code with their smartphone. So client and server share the same id.
      * @param id user id
@@ -44,6 +65,7 @@ public class ClipboardRestController {
      */
     @RequestMapping(value = "/qr-image.png", produces = MediaType.IMAGE_PNG_VALUE)
     public byte[] getQRImage(@RequestParam(value = "id") String id) {
+        id = HtmlUtils.htmlEscape(id);
         if (isInputInvalid(id)) {
             throw new UnauthorizedException();
         }
@@ -80,12 +102,13 @@ public class ClipboardRestController {
     @RequestMapping(value = "/send-data", method = RequestMethod.POST)
     public String sendData(@RequestHeader(value = "id") String id,
                                    @RequestHeader(value = "data") String data) {
+        id = HtmlUtils.htmlEscape(id);
         if (isInputInvalid(id)) {
             throw new UnauthorizedException();
         }
         User user = new User();
         user.id = UUID.fromString(id);
-        user.stringData = data;
+        user.stringData = HtmlUtils.htmlEscape(data);
         try {
             database.saveStringData(user);
         } catch (Exception e) {
@@ -93,7 +116,7 @@ public class ClipboardRestController {
             // TODO add this to every database call
             throw new PersistenceException();
         }
-        msgTemplate.convertAndSend("/topic/data-received", data);
+        msgTemplate.convertAndSend("/topic/data-received/" + user.id, data);
         return "successful";
     }
 
@@ -104,6 +127,7 @@ public class ClipboardRestController {
      */
     @RequestMapping(value = "/get-data")
     public User getData(@RequestParam(value = "id") String id) {
+        id = HtmlUtils.htmlEscape(id);
         User u = new User();
         if (isInputInvalid(id)) {
             throw new UnauthorizedException();

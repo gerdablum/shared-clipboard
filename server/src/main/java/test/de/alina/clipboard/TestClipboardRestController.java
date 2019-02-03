@@ -68,6 +68,20 @@ public class TestClipboardRestController {
         assertEquals(testdata, user.stringData);
     }
 
+    @Test
+    public void testAcknowledgeIdUnauthorized() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get("/acknowledge").param("id", "test"))
+                .andExpect(status().is(401));
+    }
+
+    @Test
+    public void testAcknowledgeId() throws Exception {
+        String userId = getValidUUID();
+        mvc.perform(MockMvcRequestBuilders.get("/acknowledge")
+                .param("id", userId))
+                .andExpect(status().isOk())
+                .andReturn(); }
+
     private String getValidUUID() throws Exception {
         MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/get-id")
                 .accept(MediaType.APPLICATION_JSON))
