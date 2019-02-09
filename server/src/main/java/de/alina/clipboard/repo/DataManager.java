@@ -53,31 +53,34 @@ public class DataManager implements IDataManager {
                 user.fileUrl = (String) data;
             }
         }
-        //TODO error handling
         return user;
 
     }
 
     @Override
     public void saveData(User user) {
-        if (redisTemplate.hasKey(USER_ID + user.id) && redisTemplate.hasKey(TYPE + user.id)) {
+        String userKey = USER_ID + user.id;
+        String typeKey = TYPE + user.id;
+        if (redisTemplate.hasKey(userKey) && redisTemplate.hasKey(typeKey)) {
             if (user.stringData != null) {
-                redisTemplate.opsForValue().set(USER_ID + user.id, user.stringData);
+                storeAndUpdateExpiration(userKey, user.stringData);
             } else if (user.fileUrl != null) {
-                redisTemplate.opsForValue().set(USER_ID + user.id, user.fileUrl);
+                storeAndUpdateExpiration(userKey, user.fileUrl);
             } else {
-                redisTemplate.opsForValue().set(USER_ID + user.id, "");
+                storeAndUpdateExpiration(userKey, "");
                 //TODO what to do when no data?
             }
-
-            redisTemplate.opsForValue().set(TYPE + user.id, user.type);
+            storeAndUpdateExpiration(typeKey, user.type);
         }
 
     }
 
     @Override
     public boolean deleteUser(UUID userID) {
-        // TODO implement
+        if (redisTemplate.hasKey(USER_ID + userID) && redisTemplate.hasKey(TYPE + userID)) {
+            redisTemplate.delete(USER_ID + userID);
+            redisTemplate.delete(TYPE + userID);
+        }
         return false;
     }
 
@@ -118,5 +121,11 @@ public class DataManager implements IDataManager {
             }
         } ).start();
 
+    }
+
+    private void storeAndUpdateExpiration(String key, Object value) {
+        long expire = redisTemplate.getExpire(key);
+        redisTemplate.opsForValue().set(key, value);
+        redisTemplate.expire(key, expire, TimeUnit.MILLISECONDS);
     }
 }
