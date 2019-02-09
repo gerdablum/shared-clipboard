@@ -1,16 +1,25 @@
 package de.alina.clipboard.repo;
 
+import de.alina.clipboard.model.DataType;
 import de.alina.clipboard.model.User;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.UUID;
 
 public interface IDataManager {
 
-    public String getStringData(UUID userID);
-    public void saveStringData(User user);
-    public boolean isUserExisting(UUID userID);
-    public void createUser(UUID userID);
+    User getData(UUID userID);
+    void saveData(User user);
+    boolean deleteUser(UUID userID);
+    boolean isUserExisting(UUID userID);
+    void createUser(UUID userID);
+    void storeFile(MultipartFile file, UUID userID) throws IOException;
 
-    public final String USER_ID = "de.alina.clipboard.userid";
-    public final int SESSION_TIMEOUT = 10;
+    String USER_ID = "de.alina.clipboard.userid";
+    String TYPE = "de.alina.clipboard.type";
+    String UPLOADED_FOLDER = "C://Users//Alina//Projekte//shared-clipboard//";
+    int SESSION_TIMEOUT = 10;
+
+
 }

@@ -61,7 +61,7 @@ function connect() {
 }
 
 function disconnect() {
-    if (stompClient != null) {
+    if (socket != null) {
         socket.close();
     }
 }

@@ -2,6 +2,7 @@ package test.de.alina.clipboard;
 
 import com.google.gson.Gson;
 import de.alina.clipboard.Application;
+import de.alina.clipboard.model.DataType;
 import de.alina.clipboard.model.User;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,12 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -65,7 +65,19 @@ public class TestClipboardRestController {
         String contentBody = result.getResponse().getContentAsString();
         Gson gson = new Gson();
         User user = gson.fromJson(contentBody, User.class);
+        DataType type = user.type;
         assertEquals(testdata, user.stringData);
+        assertEquals(DataType.STRING, type);
+    }
+
+    @Test
+    public void testUploadFileData() throws Exception {
+        String id = getValidUUID();
+        MockMultipartFile textFile = new MockMultipartFile(
+                "file", "text.txt", "text/plain", "Hello World".getBytes());
+        mvc.perform(MockMvcRequestBuilders.multipart("/upload-data")
+                .file(textFile).param("id", id))
+                .andExpect(status().isOk());
     }
 
     @Test
