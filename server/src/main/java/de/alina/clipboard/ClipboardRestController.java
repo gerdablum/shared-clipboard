@@ -43,7 +43,7 @@ public class ClipboardRestController {
      * @param id the id scanned with the smartphone
      * @return
      */
-    @RequestMapping(value = "/acknowledge")
+    @GetMapping(value = "/acknowledge", produces = MediaType.TEXT_PLAIN_VALUE)
     public String acknowledgeId(@RequestParam(value = "id") String id) {
         id = HtmlUtils.htmlEscape(id);
         if (isInputInvalid(id)) {
@@ -65,7 +65,7 @@ public class ClipboardRestController {
      * @param id user id
      * @return qr image
      */
-    @RequestMapping(value = "/qr-image.png", produces = MediaType.IMAGE_PNG_VALUE)
+    @GetMapping(value = "/qr-image.png", produces = MediaType.IMAGE_PNG_VALUE)
     public byte[] getQRImage(@RequestParam(value = "id") String id) {
         id = HtmlUtils.htmlEscape(id);
         if (isInputInvalid(id)) {
@@ -87,7 +87,7 @@ public class ClipboardRestController {
      * validation
      * @return User object which contains id
      */
-    @RequestMapping(value = "/get-id")
+    @GetMapping(value = "/get-id", produces = MediaType.APPLICATION_JSON_VALUE)
     public User getID() {
         User u = new User(UUID.randomUUID());
         database.createUser(u.id);
@@ -102,7 +102,7 @@ public class ClipboardRestController {
      * @param data which was sent to the server
      * @return
      */
-    @RequestMapping(value = "/send-data", method = RequestMethod.POST)
+    @PostMapping(value = "/send-data", produces = MediaType.TEXT_PLAIN_VALUE)
     public String sendData(@RequestHeader(value = "id") String id,
                            @RequestHeader(value = "data") String data) {
         id = HtmlUtils.htmlEscape(id);
@@ -129,7 +129,7 @@ public class ClipboardRestController {
      * @param file the file to upload
      * @return successfull if the file was uploaded or an error message
      */
-    @RequestMapping(value = "/upload-data", method = RequestMethod.POST)
+    @PostMapping(value = "/upload-data", produces = MediaType.TEXT_PLAIN_VALUE)
     public String uploadFileData(@RequestParam(value = "file") MultipartFile file,
                                  @RequestParam(value = "id") String id) {
         id = HtmlUtils.htmlEscape(id);
@@ -151,7 +151,7 @@ public class ClipboardRestController {
      * @param id unique user id
      * @return stored data or unauthorized exception
      */
-    @RequestMapping(value = "/get-data")
+    @GetMapping(value = "/get-data", produces = MediaType.APPLICATION_JSON_VALUE)
     public User getData(@RequestParam(value = "id") String id) {
         id = HtmlUtils.htmlEscape(id);
         if (isInputInvalid(id)) {

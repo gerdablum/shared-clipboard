@@ -33,8 +33,8 @@ function showData(cookieid) {
         url: hosturl + '/get-data?id=' + cookieid
     }).then(function(data) {
         // data is of type string
-        if (data.type === 'IMAGE') {
-            $('#content-container').text(data.stringData);
+        if (data.type === 'STRING') {
+            $('#content-container').html(data.stringData);
 
         // data is of type file
         } else if (data.type === 'FILE') {
