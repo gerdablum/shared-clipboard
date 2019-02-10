@@ -22,6 +22,7 @@ function lookupCookies() {
     var cookieid = Cookies.get('clipboard.id');
     id = cookieid;
     if (cookieid === undefined) {
+        //showData(cookieid);
         window.location.href = hosturl + '/index.html'
     } else {
         showData(cookieid);
@@ -35,13 +36,11 @@ function showData(cookieid) {
         // data is of type string
         if (data.type === 'STRING') {
             $('#content-container').html(data.stringData);
-
         // data is of type file
         } else if (data.type === 'FILE') {
             $('#content-container').text('');
             displayFileData(data);
         }
-
         //TODO: copy to clipboard
 
     });
@@ -80,6 +79,7 @@ function displayFileData(data) {
         var image = new Image();
         image.src = "data:" + mimeType + ";base64," + data.base64;
         image.alt = "Your clipboard content.";
+        image.width = "100%";
         $('#content-container').append(image);
     } else {
         var link = $('<a></a>');

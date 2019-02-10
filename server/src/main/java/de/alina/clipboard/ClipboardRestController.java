@@ -71,7 +71,10 @@ public class ClipboardRestController {
         if (isInputInvalid(id)) {
             throw new UnauthorizedException();
         }
-        ByteArrayOutputStream stream = QRCode.from(id).to(ImageType.PNG).stream();
+        ByteArrayOutputStream stream = QRCode.from(id)
+                .to(ImageType.PNG)
+                .withSize(250, 250)
+                .stream();
         byte[] rawImage = stream.toByteArray();
         try {
             stream.close();
