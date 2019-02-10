@@ -1,6 +1,5 @@
 package de.alina.clipboard.model;
 
-import java.net.URL;
 import java.util.UUID;
 
 public class User {

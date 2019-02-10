@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.HtmlUtils;
 
 import java.io.*;
-import java.net.URL;
 import java.util.UUID;
 
 
@@ -133,6 +132,7 @@ public class ClipboardRestController {
     @RequestMapping(value = "/upload-data", method = RequestMethod.POST)
     public String uploadFileData(@RequestParam(value = "file") MultipartFile file,
                                  @RequestParam(value = "id") String id) {
+        id = HtmlUtils.htmlEscape(id);
         if (isInputInvalid(id)) {
             throw new UnauthorizedException();
         }
@@ -142,6 +142,7 @@ public class ClipboardRestController {
             e.printStackTrace();
             throw new PersistenceException();
         }
+        msgTemplate.convertAndSend("/topic/data-received/" + id, "some data");
         return "successful";
     }
 
@@ -158,9 +159,14 @@ public class ClipboardRestController {
         }
         UUID uuid = UUID.fromString(id);
         User user = database.getData(uuid);
-        if (user.type == DataType.FILE || user.type == DataType.IMAGE_FILE) {
-            // TODO get stored file
-            user.fileUrl = "http://www.thisisanurlinthefuture.de";
+        if (user.type == DataType.FILE) {
+            try {
+                // read the file and provide data as base64 encoded string
+                user = database.getStoredFileData(user);
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new PersistenceException();
+            }
         }
         return user;
     }

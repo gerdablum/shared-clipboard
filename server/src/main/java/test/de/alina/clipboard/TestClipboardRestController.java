@@ -71,13 +71,19 @@ public class TestClipboardRestController {
     }
 
     @Test
-    public void testUploadFileData() throws Exception {
-        String id = getValidUUID();
+    public void testUploadDownloadFileData() throws Exception {
+        String uploadID = getValidUUID();
         MockMultipartFile textFile = new MockMultipartFile(
                 "file", "text.txt", "text/plain", "Hello World".getBytes());
         mvc.perform(MockMvcRequestBuilders.multipart("/upload-data")
-                .file(textFile).param("id", id))
+                .file(textFile).param("id", uploadID))
                 .andExpect(status().isOk());
+
+        MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/get-data")
+                .param("id", uploadID))
+                .andExpect(status().isOk())
+                .andReturn();
+        String contentBody = result.getResponse().getContentAsString();
     }
 
     @Test

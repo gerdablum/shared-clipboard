@@ -32,7 +32,16 @@ function showData(cookieid) {
     $.ajax({
         url: hosturl + '/get-data?id=' + cookieid
     }).then(function(data) {
-        $('#content-container').text(data.stringData);
+        // data is of type string
+        if (data.type === 'IMAGE') {
+            $('#content-container').text(data.stringData);
+
+        // data is of type file
+        } else if (data.type === 'FILE') {
+            $('#content-container').text('');
+            displayFileData(data);
+        }
+
         //TODO: copy to clipboard
 
     });
@@ -51,7 +60,6 @@ function connect() {
 
         stompClient.subscribe('/topic/acknowledge/' + id, function (data) {
             console.log("acknowledge complete, redirecting to content page.");
-            //TODO does not work ??
             var now = new Date();
             var inTenMinutes = new Date(now.getTime() + 10* 60000);
             document.cookie = "clipboard.id= " + id +"; expires=" + inTenMinutes.toUTCString();
@@ -63,5 +71,21 @@ function connect() {
 function disconnect() {
     if (socket != null) {
         socket.close();
+    }
+}
+
+function displayFileData(data) {
+    var mimeType = data.mimeType;
+    if (mimeType.includes('image')) {
+        var image = new Image();
+        image.src = "data:" + mimeType + ";base64," + data.base64;
+        image.alt = "Your clipboard content.";
+        $('#content-container').append(image);
+    } else {
+        var link = $('<a></a>');
+        link.attr('download', data.originalFileName);
+        link.attr('href', "data:" + mimeType + ";base64," + data.base64);
+        link.text("Click here to download " + data.originalFileName);
+        $('#content-container').append(link);
     }
 }
