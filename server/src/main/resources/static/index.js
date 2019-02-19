@@ -1,7 +1,8 @@
 var id = null;
 var hosturl = 'http://localhost:8090';
 var socket = null;
-$(document).ready(function() {
+
+function loadIdAndQRCode() {
 
     $.ajax({
         url: hosturl + '/get-id'
@@ -16,16 +17,16 @@ $(document).ready(function() {
         connect();
     });
 
-});
+}
 
 function lookupCookies() {
     var cookieid = Cookies.get('clipboard.id');
     id = cookieid;
     if (cookieid === undefined) {
-        //showData(cookieid);
         window.location.href = hosturl + '/index.html'
     } else {
         showData(cookieid);
+        connect();
     }
 }
 
@@ -60,7 +61,7 @@ function connect() {
         stompClient.subscribe('/topic/acknowledge/' + id, function (data) {
             console.log("acknowledge complete, redirecting to content page.");
             var now = new Date();
-            var inTenMinutes = new Date(now.getTime() + 10* 60000);
+            var inTenMinutes = new Date(now.getTime() + 30* 60000);
             document.cookie = "clipboard.id= " + id +"; expires=" + inTenMinutes.toUTCString();
             window.location.href = hosturl + '/display-data.html';
         })

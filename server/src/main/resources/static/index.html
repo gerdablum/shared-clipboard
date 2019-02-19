@@ -11,14 +11,14 @@
     <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
     <script src="index.js"></script>
 </head>
-<body>
+<body onload="loadIdAndQRCode()">
     <div class="container jumbotron mt-3" role="main">
         <div class="row">
             <div class="col-sm">
                 <h1>Welcome to Shared Clipboard</h1>
                 <p>You are not signed in. Open your Shared Clipboard App and scan the QR code.</p>
                 <div id="image-container" class=".img .d-block"></div>
-                <div id="text" class="d-none"></div>
+                <div id="text"></div>
             </div>
         </div>
         <div class="row">
