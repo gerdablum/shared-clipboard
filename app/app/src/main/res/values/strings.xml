@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">SharedClipboardApp</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="preference_file_key">de.alina.clipboard.app.sharedprefs</string>
+    <string name="user_auth_id_key">de.alina.clipboard.app.sharedpreferences.userAuthKey</string>
+    <string name="not_signed_in_info">You are not connected. Visit our website and follow the instructions to connect with your computer</string>
+    <string name="signed_in_info">You are connected.</string>
+    <string name="no_internet_info">You cannot share data currently. Please check you internet connection.</string>
+    <string name="sign_in_failed">Authentication process failed. Please try again.</string>
 </resources>
