@@ -3,7 +3,6 @@ var hosturl = 'http://localhost:8090';
 var socket = null;
 
 function loadIdAndQRCode() {
-
     $.ajax({
         url: hosturl + '/get-id'
     }).then(function(data) {
@@ -20,6 +19,8 @@ function loadIdAndQRCode() {
 }
 
 function lookupCookies() {
+    //Only show the button when automatic clipboard copying failed.
+    $('#button').hide();
     var cookieid = Cookies.get('clipboard.id');
     id = cookieid;
     if (cookieid === undefined) {
@@ -37,13 +38,53 @@ function showData(cookieid) {
         // data is of type string
         if (data.type === 'STRING') {
             $('#content-container').html(data.stringData);
+            copyAndAskForPermission(data.stringData);
         // data is of type file
         } else if (data.type === 'FILE') {
             $('#content-container').text('');
             displayFileData(data);
         }
-        //TODO: copy to clipboard
+    });
+}
 
+function copyAndAskForPermission(text) {
+    try {
+        navigator.permissions.query({
+            name: 'clipboard-write'
+        }).then(function(permissionStatus) {
+            // Will be 'granted', 'denied' or 'prompt':
+            console.log(permissionStatus.state);
+            copy(permissionStatus.state, text);
+            permissionStatus.onchange = copy(permissionStatus.state, text);
+        });
+
+    } catch(err) {
+        console.log("asking for permission failed");
+        callbackCopy();
+    }
+}
+function copy(state, text) {
+    if (state === 'granted') {
+        navigator.clipboard.writeText(text).then(function () {
+            console.log('copying successful');
+        }).catch(function (err){
+            console.log("copying failed ");
+            callbackCopy();
+        });
+    } else if (state === 'denied'){
+        callbackCopy();
+    }
+}
+
+function callbackCopy() {
+    var btn = $('#button');
+    btn.show();
+    btn.click(function() {
+        var $temp = $("<input>");
+        $("body").append($temp);
+        $temp.val($('#content-container').text()).select();
+        document.execCommand("copy");
+        $temp.remove();
     });
 }
 
@@ -76,17 +117,19 @@ function disconnect() {
 
 function displayFileData(data) {
     var mimeType = data.mimeType;
+    var btn = $('#button');
+    btn.text('Click to download');
+    btn.show();
     if (mimeType.includes('image')) {
         var image = new Image();
         image.src = "data:" + mimeType + ";base64," + data.base64;
         image.alt = "Your clipboard content.";
-        image.width = "100%";
+        image.width = 100;
         $('#content-container').append(image);
     } else {
-        var link = $('<a></a>');
-        link.attr('download', data.originalFileName);
-        link.attr('href', "data:" + mimeType + ";base64," + data.base64);
-        link.text("Click here to download " + data.originalFileName);
-        $('#content-container').append(link);
+        //TODO: Escape filename in server!!!!!
+        $('#content-container').html(data.originalFileName);
     }
+    btn.attr('download', data.originalFileName);
+    btn.attr('href', "data:" + mimeType + ";base64," + data.base64);
 }

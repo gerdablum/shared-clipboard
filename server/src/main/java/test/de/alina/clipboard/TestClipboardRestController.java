@@ -98,7 +98,17 @@ public class TestClipboardRestController {
         mvc.perform(MockMvcRequestBuilders.get("/acknowledge")
                 .param("id", userId))
                 .andExpect(status().isOk())
-                .andReturn(); }
+                .andReturn();
+    }
+
+    @Test
+    public void testLogout() throws Exception {
+        String userId = getValidUUID();
+        mvc.perform(MockMvcRequestBuilders.get("/logout")
+                .param("id", userId))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
 
     private String getValidUUID() throws Exception {
         MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/get-id")

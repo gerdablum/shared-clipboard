@@ -30,12 +30,10 @@ public class DataManager implements IDataManager {
     /**
      * to save stringData in String format
      */
-    private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
     public DataManager(RedisTemplate<String, Object> redisTemplate, StringRedisTemplate stringRedisTemplate) {
         this.redisTemplate = redisTemplate;
-        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     @Override
@@ -141,6 +139,8 @@ public class DataManager implements IDataManager {
         fileUrl = fileUrl.replace(UPLOADED_FOLDER, "");
         fileUrl = fileUrl.replace(user.id.toString(), "");
         fileUser.originalFileName = fileUrl;
+        // delete the internal path to the url before returning to the user
+        fileUser.fileUrl = "";
 
         try {
             fileUser.mimeType = URLConnection.guessContentTypeFromName(file.getName());

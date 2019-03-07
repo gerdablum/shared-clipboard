@@ -174,6 +174,22 @@ public class ClipboardRestController {
         return user;
     }
 
+    @GetMapping(value = "/logout", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String logout(@RequestParam(value = "id") String id) {
+        id = HtmlUtils.htmlEscape(id);
+        if (isInputInvalid(id)) {
+            throw new UnauthorizedException();
+        }
+        UUID uuid = UUID.fromString(id);
+        try {
+            database.deleteUser(uuid);
+        } catch(Exception e) {
+            e.printStackTrace();
+            throw new PersistenceException();
+        }
+        return "successful";
+    }
+
     private boolean isInputInvalid(String id) {
         UUID uuid;
         try {
