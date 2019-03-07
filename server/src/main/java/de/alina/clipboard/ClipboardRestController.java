@@ -182,6 +182,8 @@ public class ClipboardRestController {
         }
         UUID uuid = UUID.fromString(id);
         try {
+
+
             database.deleteUser(uuid);
         } catch(Exception e) {
             e.printStackTrace();
