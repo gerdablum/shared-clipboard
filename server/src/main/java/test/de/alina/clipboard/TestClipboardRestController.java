@@ -16,6 +16,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.UUID;
+
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -108,6 +110,27 @@ public class TestClipboardRestController {
                 .param("id", userId))
                 .andExpect(status().isOk())
                 .andReturn();
+    }
+
+    @Test
+    public void testConnectionIsConnected() throws Exception {
+        String userId = getValidUUID();
+        MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/connected")
+                .param("id", userId))
+                .andExpect(status().isOk())
+                .andReturn();
+        String contentBody = result.getResponse().getContentAsString();
+        assertEquals("true", contentBody);
+    }
+
+    @Test
+    public void testConnectionIsNotConnected() throws Exception {
+        MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/connected")
+                .param("id", UUID.randomUUID().toString()))
+                .andExpect(status().isOk())
+                .andReturn();
+        String contentBody = result.getResponse().getContentAsString();
+        assertEquals("false", contentBody);
     }
 
     private String getValidUUID() throws Exception {

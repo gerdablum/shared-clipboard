@@ -123,7 +123,7 @@ public class ClipboardRestController {
             // TODO add this to every database call
             throw new PersistenceException();
         }
-        msgTemplate.convertAndSend("/topic/data-received/" + user.id, data);
+        msgTemplate.convertAndSend("/topic/data-received/" + user.id, HtmlUtils.htmlEscape(data));
         return "successful";
     }
 
@@ -189,7 +189,19 @@ public class ClipboardRestController {
             e.printStackTrace();
             throw new PersistenceException();
         }
+        msgTemplate.convertAndSend("/topic/acknowledge/" + id, "logout");
         return "successful";
+    }
+
+    //TODO test
+    @GetMapping(value = "/connected", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String testConnection(@RequestParam(value = "id") String id) {
+        id = HtmlUtils.htmlEscape(id);
+        if (isInputInvalid(id)) {
+            return "false";
+        } else {
+            return "true";
+        }
     }
 
     private boolean isInputInvalid(String id) {

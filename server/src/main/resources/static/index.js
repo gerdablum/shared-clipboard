@@ -60,7 +60,7 @@ function copyAndAskForPermission(text) {
 
     } catch(err) {
         console.log("asking for permission failed");
-        callbackCopy();
+        fallbackCopy();
     }
 }
 function copy(state, text) {
@@ -69,14 +69,14 @@ function copy(state, text) {
             console.log('copying successful');
         }).catch(function (err){
             console.log("copying failed ");
-            callbackCopy();
+            fallbackCopy();
         });
     } else if (state === 'denied'){
-        callbackCopy();
+        fallbackCopy();
     }
 }
 
-function callbackCopy() {
+function fallbackCopy() {
     var btn = $('#button');
     btn.show();
     btn.click(function() {
@@ -95,16 +95,22 @@ function connect() {
         console.log('Connected: ' + frame);
         if (id === null) return;
         stompClient.subscribe('/topic/data-received/' + id, function (data) {
-            console.log("subscription is called"+data);
+            console.log("subscription is called" + data);
             showData(id);
         });
 
         stompClient.subscribe('/topic/acknowledge/' + id, function (data) {
-            console.log("acknowledge complete, redirecting to content page.");
-            var now = new Date();
-            var inTenMinutes = new Date(now.getTime() + 30* 60000);
-            document.cookie = "clipboard.id= " + id +"; expires=" + inTenMinutes.toUTCString();
-            window.location.href = hosturl + '/display-data.html';
+            if(data.body == 'logout') {
+                document.cookie = "clipboard.id= " + id + "; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+                window.location.href = hosturl;
+            } else {
+                console.log("acknowledge complete, redirecting to content page.");
+                var now = new Date();
+                var inTenMinutes = new Date(now.getTime() + 30* 60000);
+                document.cookie = "clipboard.id= " + id +"; expires=" + inTenMinutes.toUTCString();
+                window.location.href = hosturl + '/display-data.html';
+            }
+
         })
     });
 }
