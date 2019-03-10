@@ -9,16 +9,12 @@ import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.*
 
-class LogoutController(val apiCallback: ClipboardServerAPICallback): Callback<String?> {
+class LogoutController(val apiCallback: ClipboardServerAPICallback): Callback<String?>, BaseApiController() {
 
     fun logout(id: UUID) {
-        val retrofit = Retrofit.Builder().baseUrl(ClipboardServerAPI.BASE_URL)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .build()
-        val clipboardAPI = retrofit.create(ClipboardServerAPI::class.java)
-        val call = clipboardAPI.logout(id.toString())
+        val call = apiString.logout(id.toString())
         call.enqueue(this)
-
+        Log.d(this.toString(), "Requesting " + call.request().url())
     }
     override fun onFailure(call: Call<String?>?, t: Throwable?) {
         apiCallback.onFailure(Bundle(), ClipboardServerAPICallback.CallType.LOGOUT, t)

@@ -15,6 +15,10 @@ interface ClipboardServerAPI {
     @Headers("Accept: text/plain")
     fun logout(@Query("id") id: String): Call<String?>
 
+    @GET("/connected")
+    @Headers("Accept: text/plain")
+    fun testConnection(@Query("id") id: String): Call<String?>
+
     @GET("/get-data")
     @Headers("Accept: application/json")
     fun getData(@Query("id")id: String): Call<User?>
@@ -27,7 +31,10 @@ interface ClipboardServerAPI {
     @Headers("Accept: text/plain")
     fun uploadData(@Header("id")id: String, @Header("file")file: File): Call<String?>
 
+
+
     companion object {
         const val BASE_URL = "http://100.64.2.32:8090"
+        //const val BASE_URL = "http://192.168.11.106:8090/"
     }
 }
