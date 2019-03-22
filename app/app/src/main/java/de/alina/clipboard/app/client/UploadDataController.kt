@@ -23,6 +23,11 @@ class UploadDataController(var apiCallback: ClipboardServerAPICallback): Callbac
     }
 
     override fun onResponse(call: Call<String?>, response: Response<String?>) {
-
+        if (response.isSuccessful) {
+            apiCallback.onSuccess(Bundle(), ClipboardServerAPICallback.CallType.SEND_FILE_DATA)
+        } else {
+            Log.e("UploadDataController", "Server responded with response code " + response.code())
+            apiCallback.onFailure(Bundle(), ClipboardServerAPICallback.CallType.SEND_FILE_DATA, null)
+        }
     }
 }

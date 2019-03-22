@@ -120,7 +120,7 @@ class MainActivity : AppCompatActivity(), ClipboardServerAPICallback {
         // TODO: wait for server implementation and copy to local clipboard
     }
 
-    private fun processLogoutSuccessful(data: Bundle) {
+    private fun processLogoutSuccessful(data: Bundle? = null) {
         user?.let {
             val editor = this.getSharedPreferences(
                     getString(R.string.preference_file_key), Context.MODE_PRIVATE).edit()
@@ -151,7 +151,7 @@ class MainActivity : AppCompatActivity(), ClipboardServerAPICallback {
         } else {
            user = null
            userLoggedIn = false
-           showLoggedOutSuccessfully()
+           processLogoutSuccessful()
         }
     }
 
@@ -225,7 +225,12 @@ class MainActivity : AppCompatActivity(), ClipboardServerAPICallback {
         }
         val intent = Intent(this, CopyEventService::class.java)
         intent.putExtra(User.USER_KEY, user?.id.toString())
-        startForegroundService(intent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
+        }
+
     }
 
     private fun showLoggedOutSuccessfully() {

@@ -19,5 +19,6 @@ interface ClipboardServerAPICallback {
     companion object {
         const val CALLBACK_ID_KEY = "de.alina.clipboard.app.callbackId"
         const val CALLBACK_KEY_ERROR_CODE = "de.alina.clipboard.app.callbackErrorCode"
+        const val CALLBACK_KEY_USER= "de.alina.clipboard.app.callbackUser"
     }
 }
