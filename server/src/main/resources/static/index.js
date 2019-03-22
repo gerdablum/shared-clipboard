@@ -1,5 +1,5 @@
 var id = null;
-var hosturl = 'http://localhost:8090';
+var hosturl = location.protocol + '//' + location.host;
 var socket = null;
 
 function loadIdAndQRCode() {
@@ -119,6 +119,16 @@ function disconnect() {
     if (socket != null) {
         socket.close();
     }
+}
+
+function logout() {
+    $.ajax({
+        url: hosturl + '/logout',
+        type: 'get',
+        data: {
+            id: id
+        }
+    })
 }
 
 function displayFileData(data) {
