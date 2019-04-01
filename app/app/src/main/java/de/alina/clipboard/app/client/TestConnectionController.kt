@@ -20,7 +20,7 @@ class TestConnectionController(val apiCallback: ClipboardServerAPICallback): Cal
     }
 
     override fun onResponse(call: Call<String?>, response: Response<String?>) {
-        if (response.isSuccessful == true) {
+        if (response.isSuccessful) {
             if (response.body() == "true") {
                 apiCallback.onSuccess(Bundle(), ClipboardServerAPICallback.CallType.CONNECTION)
             } else {

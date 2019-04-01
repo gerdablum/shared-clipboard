@@ -16,7 +16,6 @@ class CancelServiceReceiver: BroadcastReceiver(), ClipboardServerAPICallback {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         val id = intent?.getStringExtra("blabla")
-        //TODO not working - why?
         id?.let {
             val uuid = UUID.fromString(it)
             LogoutController(this).logout(uuid)

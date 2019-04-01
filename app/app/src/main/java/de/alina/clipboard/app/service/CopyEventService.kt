@@ -10,7 +10,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.app.NotificationCompat
 import android.util.Log
-import de.alina.clipboard.app.MainActivity.Companion.CHANNEL_ID
+import de.alina.clipboard.app.view.MainActivity.Companion.CHANNEL_ID
 import de.alina.clipboard.app.R
 import de.alina.clipboard.app.client.ClipboardServerAPICallback
 import de.alina.clipboard.app.client.SendDataController

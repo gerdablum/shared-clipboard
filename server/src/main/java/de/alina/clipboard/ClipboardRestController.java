@@ -8,6 +8,7 @@ import de.alina.clipboard.model.User;
 import de.alina.clipboard.repo.DataManager;
 import de.alina.clipboard.repo.IDataManager;
 import net.glxn.qrgen.core.image.ImageType;
+import net.glxn.qrgen.core.scheme.Girocode;
 import net.glxn.qrgen.javase.QRCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,7 +115,7 @@ public class ClipboardRestController {
         }
         User user = new User();
         user.id = UUID.fromString(id);
-        user.stringData = HtmlUtils.htmlEscape(data);
+        user.stringData = data;//HtmlUtils.htmlEscape(data, "utf-8");
         user.type = DataType.STRING;
         try {
             database.saveData(user);

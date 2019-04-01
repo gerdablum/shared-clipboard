@@ -12,7 +12,7 @@ interface ClipboardServerAPI {
     fun acknowledge(@Query("id") id: String): Call<String?>
 
     @GET("/logout")
-    @Headers("Accept: text/plain")
+    @Headers("Accept: text/plain, application/json")
     fun logout(@Query("id") id: String): Call<String?>
 
     @GET("/connected")
@@ -35,6 +35,7 @@ interface ClipboardServerAPI {
 
     companion object {
         //const val BASE_URL = "http://100.64.2.32:8090"
-        const val BASE_URL = "http://192.168.11.106:8090/"
+        //const val BASE_URL = "http://192.168.11.106:8090/"
+        const val BASE_URL = "http://192.168.1.47:8090/"
     }
 }

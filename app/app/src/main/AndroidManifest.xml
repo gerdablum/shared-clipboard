@@ -22,7 +22,7 @@
         <receiver android:name=".service.CancelServiceReceiver" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".view.MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
