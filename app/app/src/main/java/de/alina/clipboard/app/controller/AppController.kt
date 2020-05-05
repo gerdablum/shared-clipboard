@@ -3,31 +3,34 @@ package de.alina.clipboard.app.controller
 import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.arch.lifecycle.Lifecycle
-import android.arch.lifecycle.LifecycleObserver
-import android.arch.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import android.content.Context
 import android.content.Intent
+import android.database.Cursor
 import android.graphics.Bitmap
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import android.support.v7.app.AppCompatActivity
+import android.provider.OpenableColumns
+import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import de.alina.clipboard.app.R
-import de.alina.clipboard.app.client.AcknowledgeController
-import de.alina.clipboard.app.client.ClipboardServerAPICallback
-import de.alina.clipboard.app.client.LogoutController
-import de.alina.clipboard.app.client.TestConnectionController
+import de.alina.clipboard.app.client.*
 import de.alina.clipboard.app.model.User
 import de.alina.clipboard.app.service.CopyEventService
 import de.alina.clipboard.app.view.BaseView
 import de.alina.clipboard.app.view.MainActivity
+import okhttp3.MediaType
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.lang.Exception
 import java.util.*
 
@@ -36,6 +39,7 @@ class AppController(private val context: Activity, private val view: BaseView): 
     private val ackController by lazy { AcknowledgeController(this)}
     private val logoutController by lazy { LogoutController(this)}
     private val connectController by lazy { TestConnectionController(this) }
+    private val uploadController by lazy { UploadDataController(this) }
     var user: User? = null
     var userLoggedIn = false
 
@@ -57,6 +61,32 @@ class AppController(private val context: Activity, private val view: BaseView): 
             }
     }
 
+    fun uploadBytes(fileUri: Uri, mimeType: MediaType) {
+        checkUserKey()
+        val inputStream = context.contentResolver.openInputStream(fileUri)
+        val byteArray = getBytes(inputStream)
+
+        val cursor: Cursor? = context.contentResolver.query( fileUri, null, null, null, null, null)
+
+        val filename = cursor?.use {
+            // moveToFirst() returns false if the cursor has 0 rows.  Very handy for
+            // "if there's anything to look at, look at it" conditionals.
+            if (it.moveToFirst()) {
+
+                // Note it's called "Display Name".  This is
+                // provider-specific, and might not necessarily be the file name.
+                it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+
+            } else {
+                "Unknown"
+            }
+        }
+
+            user?.id?.let {
+            uploadController.sendFileData(it, byteArray, mimeType, filename ?: "unknown-file")
+        }
+    }
+
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Create the NotificationChannel
@@ -72,7 +102,7 @@ class AppController(private val context: Activity, private val view: BaseView): 
         }
     }
 
-    private fun checkUserKey(){
+    public fun checkUserKey(){
         val sharedPref = context.getSharedPreferences(
                 context.getString(R.string.preference_file_key), Context.MODE_PRIVATE)
         val userID = sharedPref.getString(context.getString(R.string.user_auth_id_key), "") ?: ""
@@ -175,7 +205,9 @@ class AppController(private val context: Activity, private val view: BaseView): 
                 .build()
         val detector = FirebaseVision.getInstance().getVisionBarcodeDetector(options);
         val image = FirebaseVisionImage.fromBitmap(bitmap)
-        detector.detectInImage(image).addOnSuccessListener {
+        //TODO: Change back, only for testing
+        checkAndProceedUUID("9a5855e2-3dbc-4f57-9c9c-9b2f642e48a6")
+        /*detector.detectInImage(image).addOnSuccessListener {
             if (it.isEmpty()) {
                 view.showFailure()
                 return@addOnSuccessListener
@@ -188,9 +220,22 @@ class AppController(private val context: Activity, private val view: BaseView): 
         }.addOnFailureListener {
             it.printStackTrace()
             view.showFailure()
-        }
+        }*/
     }
 
+    fun getBytes(inputStream: InputStream?): ByteArray {
+        var byteBuffer = ByteArrayOutputStream()
+        val bufferSize = 1024;
+        var buffer = ByteArray(bufferSize);
+
+        var len = inputStream?.read(buffer) ?: -1
+        while (len != -1) {
+            byteBuffer.write(buffer, 0, len);
+            len = inputStream?.read(buffer) ?: -1
+        }
+        inputStream?.close()
+        return byteBuffer.toByteArray();
+    }
 
     override fun onSuccess(data: Bundle, type: ClipboardServerAPICallback.CallType) {
         when(type) {
@@ -212,7 +257,7 @@ class AppController(private val context: Activity, private val view: BaseView): 
             ClipboardServerAPICallback.CallType.SEND_FILE_DATA -> view.showSendDataFailure()
             ClipboardServerAPICallback.CallType.GET_DATA -> view.showGetDataFailure()
             ClipboardServerAPICallback.CallType.LOGOUT -> view.showLogoutFailure()
-            ClipboardServerAPICallback.CallType.CONNECTION -> view.showLogoutSuccessful()
+            ClipboardServerAPICallback.CallType.CONNECTION -> processLogoutSuccessful()
         }
     }
 

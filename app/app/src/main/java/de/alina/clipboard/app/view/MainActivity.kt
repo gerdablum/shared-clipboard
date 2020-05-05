@@ -1,16 +1,24 @@
 package de.alina.clipboard.app.view
 
 import android.content.Intent
+import android.database.Cursor
+import android.net.Uri
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity;
+import android.os.Parcel
+import android.os.Parcelable
+import android.provider.OpenableColumns
+import androidx.appcompat.app.AppCompatActivity;
+import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.widget.Toolbar
 import de.alina.clipboard.app.R
 import de.alina.clipboard.app.controller.AppController
 import de.alina.clipboard.app.controller.AppController.Companion.CAPTURE_PICTURE_REQUEST
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import okhttp3.MediaType
 
 class MainActivity : AppCompatActivity(), BaseView {
 
@@ -30,6 +38,21 @@ class MainActivity : AppCompatActivity(), BaseView {
         fab.setOnClickListener { controller.captureImage() }
         button_logout.setOnClickListener {
             controller.logoutUser()
+        }
+        when {
+            intent?.action == Intent.ACTION_SEND -> {
+                if (intent.type == "text/plain") {
+                    Log.d("ShareActivity", "text shared")
+                } else if (intent.type.contains("image/")) {
+                    (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM)as? Uri)?.let {
+                        controller.uploadBytes(it, MediaType.parse(intent.type)!!)
+                        Log.d("MainActivity", "image shared")
+                    }
+                } else if (intent.type == "application/pdf") {
+
+                }
+            }
+            else -> Log.d("MainActivity", "do nothing")
         }
     }
 

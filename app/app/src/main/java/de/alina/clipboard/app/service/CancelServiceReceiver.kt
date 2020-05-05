@@ -15,8 +15,9 @@ class CancelServiceReceiver: BroadcastReceiver(), ClipboardServerAPICallback {
     private var context: Context? = null
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        val id = intent?.getStringExtra("blabla")
-        id?.let {
+        val sharedPref = context?.getSharedPreferences(
+                context.getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        sharedPref?.getString(context.getString(R.string.user_auth_id_key), "")?.let {
             val uuid = UUID.fromString(it)
             LogoutController(this).logout(uuid)
         }
