@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>My Clipboard</title>
+    <link rel="stylesheet" href="/webjars/bootstrap/css/bootstrap.min.css" media="screen"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+    <script src = "index.js"></script>
+</head>
+<body onload="lookupCookies()">
+<a href="#" id="btn-logout" onclick="logout()"class="btn btn-primary bg-secondary float-right m-1">Logout</a>
+    <div class="starter-template jumbotron bg-white container">
+        <div class="row">
+            <div class="col-md-5">
+                <h1 class="mb-4">Your smart phone clipboard contains:</h1>
+                <div class="card">
+                    <div id = "content-container" class="card-body">Nothing so far.</div>
+                    <a href="#" id="button" class="btn btn-primary m-2 d-inline-block" style="width: 12rem">Copy to your clipboard</a>
+                </div>
+            </div>
+        </div>
+
+        <p class="mt-4">Please check our <a href="">help page</a> if you aren't seeing the expected content or having trouble with something else.</p>
+    </div>
+    <footer class="modal-footer fixed-bottom bg-secondary rounded-0">
+        <ul class="nav">
+            <li class="nav-item p-2"><u>About</u></li>
+            <li class="nav-item p-2"><u>Help</u></li>
+            <li class="nav-item p-2"><u>Privacy policy</u></li>
+            <li class="nav-item p-2"><u>Legal</u></li>
+        </ul>
+    </footer>
+</body>
+</html>

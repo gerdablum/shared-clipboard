@@ -33,12 +33,19 @@ function lookupCookies() {
 
 function showData(cookieid) {
     $.ajax({
-        url: hosturl + '/get-data?id=' + cookieid
+        url: hosturl + '/get-data', //?id=' + cookieid,
+        withCredentials: true,
+        error: function(xhr, status) {
+            window.location.href = hosturl }
     }).then(function(data) {
         // data is of type string
         if (data.type === 'STRING') {
             $('#content-container').html(data.stringData);
-            copyAndAskForPermission(data.stringData);
+            var btn = $('#button');
+            btn.removeAttr('download');
+            btn.removeAttr('href');
+            btn.text('Copy to your clipboard');
+            //copyAndAskForPermission(data.stringData);
         // data is of type file
         } else if (data.type === 'FILE') {
             $('#content-container').text('');
@@ -125,9 +132,7 @@ function logout() {
     $.ajax({
         url: hosturl + '/logout',
         type: 'get',
-        data: {
-            id: id
-        }
+        withCredentials: true
     })
 }
 

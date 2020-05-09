@@ -1,4 +1,4 @@
-package de.alina.clipboard;
+package de.alina.clipboard.controller;
 
 import de.alina.clipboard.exception.WebSocketException;
 import de.alina.clipboard.exception.PersistenceException;
@@ -67,7 +67,7 @@ public class ClipboardRestController {
      */
     //TODO remove ID from query
     @GetMapping(value = "/qr-image.png", produces = MediaType.IMAGE_PNG_VALUE)
-    public byte[] getQRImage(@CookieValue(value = "clipboard.id") String id) {
+    public byte[] getQRImage(@RequestParam(value = "id") String id) {
         id = HtmlUtils.htmlEscape(id);
         if (isInputInvalid(id)) {
             throw new UnauthorizedException();
@@ -93,8 +93,8 @@ public class ClipboardRestController {
      */
     @GetMapping(value = "/get-id", produces = MediaType.APPLICATION_JSON_VALUE)
     public User getID() {
-        //TODO: change back, only for testing!
-        User u = new User(UUID.fromString("9a5855e2-3dbc-4f57-9c9c-9b2f642e48a6"));//new User(UUID.randomUUID());
+        User u = //new User(UUID.fromString("9a5855e2-3dbc-4f57-9c9c-9b2f642e48a6"));
+        new User(UUID.randomUUID());
         database.createUser(u.id);
         logger.debug("created user with id: " + u.id.toString());
         return u;
