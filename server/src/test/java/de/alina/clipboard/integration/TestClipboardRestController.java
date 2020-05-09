@@ -1,5 +1,3 @@
-package test.de.alina.clipboard;
-
 import com.google.gson.Gson;
 import de.alina.clipboard.Application;
 import de.alina.clipboard.model.DataType;
@@ -7,8 +5,7 @@ import de.alina.clipboard.model.User;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -16,15 +13,18 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.HashMap;
+
+import javax.servlet.http.Cookie;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
-@SpringBootTest(classes = Application.class)
+@SpringBootTest(
+        classes = Application.class)
 public class TestClipboardRestController {
 
     @Autowired
@@ -40,7 +40,8 @@ public class TestClipboardRestController {
 
     @Test
     public void testGetQRcodeInvalid() throws Exception {
-        mvc.perform(MockMvcRequestBuilders.get("/qr-image.png").param("id", "test")
+        mvc.perform(MockMvcRequestBuilders.get("/qr-image.png")
+                .param("id", "test")
                 .accept(MediaType.IMAGE_PNG_VALUE))
                 .andExpect(status().is(401));
     }
@@ -48,7 +49,8 @@ public class TestClipboardRestController {
     @Test
     public void testQRcodeValid() throws Exception {
         String userid = getValidUUID();
-        mvc.perform(MockMvcRequestBuilders.get("/qr-image.png").param("id", userid)
+        mvc.perform(MockMvcRequestBuilders.get("/qr-image.png")
+                .param("id", userid)
                 .accept(MediaType.IMAGE_PNG_VALUE))
                 .andExpect(status().isOk());
     }
@@ -57,12 +59,14 @@ public class TestClipboardRestController {
     public void testSendAndGetData() throws Exception {
         String userid = getValidUUID();
         String testdata = "hello world!";
-        mvc.perform(MockMvcRequestBuilders.post("/send-data")
-                .header("id",userid)
+        MvcResult request = mvc.perform(MockMvcRequestBuilders.post("/send-data")
+                .cookie(new Cookie("clipboard.id", userid))
                 .header("data", testdata))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andReturn();
+        System.out.println(request);
         MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/get-data")
-                .param("id", userid))
+                .cookie(new Cookie("clipboard.id", userid)))
                 .andExpect(status().isOk())
                 .andReturn();
         String contentBody = result.getResponse().getContentAsString();
@@ -79,11 +83,11 @@ public class TestClipboardRestController {
         MockMultipartFile textFile = new MockMultipartFile(
                 "file", "text.txt", "text/plain", "Hello World".getBytes());
         mvc.perform(MockMvcRequestBuilders.multipart("/upload-data")
-                .file(textFile).param("id", uploadID))
+                .file(textFile).cookie(new Cookie("clipboard.id", uploadID)))
                 .andExpect(status().isOk());
 
         MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/get-data")
-                .param("id", uploadID))
+                .cookie(new Cookie("clipboard.id", uploadID)))
                 .andExpect(status().isOk())
                 .andReturn();
         String contentBody = result.getResponse().getContentAsString();
@@ -91,7 +95,8 @@ public class TestClipboardRestController {
 
     @Test
     public void testAcknowledgeIdUnauthorized() throws Exception {
-        mvc.perform(MockMvcRequestBuilders.get("/acknowledge").param("id", "test"))
+        mvc.perform(MockMvcRequestBuilders.get("/acknowledge")
+                .cookie(new Cookie("clipboard.id", "test")))
                 .andExpect(status().is(401));
     }
 
@@ -99,7 +104,7 @@ public class TestClipboardRestController {
     public void testAcknowledgeId() throws Exception {
         String userId = getValidUUID();
         mvc.perform(MockMvcRequestBuilders.get("/acknowledge")
-                .param("id", userId))
+                .cookie(new Cookie("clipboard.id", userId)))
                 .andExpect(status().isOk())
                 .andReturn();
     }
@@ -108,7 +113,7 @@ public class TestClipboardRestController {
     public void testLogout() throws Exception {
         String userId = getValidUUID();
         mvc.perform(MockMvcRequestBuilders.get("/logout")
-                .param("id", userId))
+                .cookie(new Cookie("clipboard.id", userId)))
                 .andExpect(status().isOk())
                 .andReturn();
     }
@@ -117,7 +122,7 @@ public class TestClipboardRestController {
     public void testConnectionIsConnected() throws Exception {
         String userId = getValidUUID();
         MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/connected")
-                .param("id", userId))
+                .cookie(new Cookie("clipboard.id", userId)))
                 .andExpect(status().isOk())
                 .andReturn();
         String contentBody = result.getResponse().getContentAsString();
@@ -127,7 +132,7 @@ public class TestClipboardRestController {
     @Test
     public void testConnectionIsNotConnected() throws Exception {
         MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/connected")
-                .param("id", UUID.randomUUID().toString()))
+                .cookie(new Cookie("clipboard.id", UUID.randomUUID().toString())))
                 .andExpect(status().isOk())
                 .andReturn();
         String contentBody = result.getResponse().getContentAsString();

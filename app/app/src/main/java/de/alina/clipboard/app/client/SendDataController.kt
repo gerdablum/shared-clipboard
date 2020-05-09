@@ -16,7 +16,7 @@ import java.util.*
 class SendDataController(val apiCallback: ClipboardServerAPICallback): Callback<String?>, BaseApiController(){
 
     fun sendStringData(id: UUID, stringData: String) {
-        val call = apiJSON.sendData(id.toString(), Html.escapeHtml(stringData))
+        val call = apiJSON.sendData("clipboard.id=" + id.toString(), Html.escapeHtml(stringData))
         call.enqueue(this)
         Log.d(this.toString(), "Requesting " + call.request().url())
     }

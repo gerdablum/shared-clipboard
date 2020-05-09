@@ -7,10 +7,10 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
 
-class TestConnectionController(val apiCallback: ClipboardServerAPICallback): Callback<String?>, BaseApiController() {
+open class CheckConnectionController(val apiCallback: ClipboardServerAPICallback): Callback<String?>, BaseApiController() {
 
     fun isConnected(id: UUID) {
-        val call = apiString.testConnection(id.toString())
+        val call = apiString.testConnection("clipboard.id=" + id.toString())
         call.enqueue(this)
         Log.d(this.toString(), "Requesting " + call.request().url())
 

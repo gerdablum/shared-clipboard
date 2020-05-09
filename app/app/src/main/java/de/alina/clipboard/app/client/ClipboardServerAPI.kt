@@ -11,34 +11,34 @@ interface ClipboardServerAPI {
 
     @GET("/acknowledge")
     @Headers("Accept: text/plain")
-    fun acknowledge(@Query("id") id: String): Call<String?>
+    fun acknowledge(@Header("Cookie") id: String): Call<String?>
 
     @GET("/logout")
     @Headers("Accept: text/plain, application/json")
-    fun logout(@Query("id") id: String): Call<String?>
+    fun logout(@Header("Cookie") id: String): Call<String?>
 
     @GET("/connected")
     @Headers("Accept: text/plain")
-    fun testConnection(@Query("id") id: String): Call<String?>
+    fun testConnection(@Header("Cookie") id: String): Call<String?>
 
     @GET("/get-data")
     @Headers("Accept: application/json")
-    fun getData(@Query("id")id: String): Call<User?>
+    fun getData(@Header("Cookie")id: String): Call<User?>
 
     @POST("/send-data")
     @Headers("Accept: text/plain")
-    fun sendData(@Header("id")id: String, @Header("data") stringData: String): Call<String?>
+    fun sendData(@Header("Cookie")id: String, @Header("data") stringData: String): Call<String?>
 
     @Multipart
     @POST("upload-data")
     @Headers("Accept: text/plain, application/json")
-    fun uploadData(@Query("id")id: String, @Part file: MultipartBody.Part): Call<String?>
+    fun uploadData(@Header("Cookie")id: String, @Part file: MultipartBody.Part): Call<String?>
 
 
 
     companion object {
-        const val BASE_URL = "http://100.64.2.32:8090"
-        //const val BASE_URL = "http://192.168.11.106:8090/"
+        //const val BASE_URL = "http://100.64.2.32:8090"
+        const val BASE_URL = "http://192.168.1.26:8090/"
         //const val BASE_URL = "http://172.27.176.59:8090/"
     }
 }

@@ -14,13 +14,15 @@ import de.alina.clipboard.app.view.MainActivity.Companion.CHANNEL_ID
 import de.alina.clipboard.app.R
 import de.alina.clipboard.app.client.ClipboardServerAPICallback
 import de.alina.clipboard.app.client.SendDataController
+import de.alina.clipboard.app.manager.ClipboardNotificationManager
 import de.alina.clipboard.app.model.User.Companion.USER_KEY
 import java.util.*
 
 class CopyEventService: Service(), ClipboardServerAPICallback{
+    lateinit var notifManager: ClipboardNotificationManager
 
 
-    private fun buildNotification(id: UUID): Notification {
+    private fun IbuildNotification(id: UUID): Notification {
         val cancelIntent = Intent(this, CancelServiceReceiver::class.java)
         cancelIntent.putExtra("blabla", id.toString())
         val pendingIntent = PendingIntent.getBroadcast(this, 0, cancelIntent, 0)
@@ -59,7 +61,8 @@ class CopyEventService: Service(), ClipboardServerAPICallback{
             }
         }
         isRunning = true
-        startForeground(FOREGROUND_SERVICE_ID, buildNotification(id))
+        val cancelIntent = Intent(this, CancelServiceReceiver::class.java)
+        startForeground(FOREGROUND_SERVICE_ID, notifManager.buildNotification(id, this, cancelIntent))
         Log.d("CopyEventService", "service created.")
         return Service.START_NOT_STICKY
     }

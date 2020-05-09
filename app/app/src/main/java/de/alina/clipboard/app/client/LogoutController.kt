@@ -12,7 +12,7 @@ import java.util.*
 class LogoutController(val apiCallback: ClipboardServerAPICallback): Callback<String?>, BaseApiController() {
 
     fun logout(id: UUID) {
-        val call = apiString.logout(id.toString())
+        val call = apiString.logout("clipboard.id=" + id.toString())
         call.enqueue(this)
         Log.d(this.toString(), "Requesting " + call.request().url())
     }

@@ -38,7 +38,7 @@ class CancelServiceReceiver: BroadcastReceiver(), ClipboardServerAPICallback {
         t?.printStackTrace()
         val intent = Intent(context, CopyEventService::class.java)
         context?.stopService(intent)
-        Log.e("CancelServiceReceiver", "Could not log out.")
+        Log.e("CancelServiceReceiver", "Logout failed.")
     }
 
 }

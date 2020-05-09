@@ -8,7 +8,6 @@ import de.alina.clipboard.model.User;
 import de.alina.clipboard.repo.DataManager;
 import de.alina.clipboard.repo.IDataManager;
 import net.glxn.qrgen.core.image.ImageType;
-import net.glxn.qrgen.core.scheme.Girocode;
 import net.glxn.qrgen.javase.QRCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +44,7 @@ public class ClipboardRestController {
      * @return
      */
     @GetMapping(value = "/acknowledge", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String acknowledgeId(@RequestParam(value = "id") String id) {
+    public String acknowledgeId(@CookieValue(value = "clipboard.id") String id) {
         id = HtmlUtils.htmlEscape(id);
         if (isInputInvalid(id)) {
             throw new UnauthorizedException();
@@ -66,8 +65,9 @@ public class ClipboardRestController {
      * @param id user id
      * @return qr image
      */
+    //TODO remove ID from query
     @GetMapping(value = "/qr-image.png", produces = MediaType.IMAGE_PNG_VALUE)
-    public byte[] getQRImage(@RequestParam(value = "id") String id) {
+    public byte[] getQRImage(@CookieValue(value = "clipboard.id") String id) {
         id = HtmlUtils.htmlEscape(id);
         if (isInputInvalid(id)) {
             throw new UnauthorizedException();
@@ -93,7 +93,8 @@ public class ClipboardRestController {
      */
     @GetMapping(value = "/get-id", produces = MediaType.APPLICATION_JSON_VALUE)
     public User getID() {
-        User u = new User(UUID.randomUUID());
+        //TODO: change back, only for testing!
+        User u = new User(UUID.fromString("9a5855e2-3dbc-4f57-9c9c-9b2f642e48a6"));//new User(UUID.randomUUID());
         database.createUser(u.id);
         logger.debug("created user with id: " + u.id.toString());
         return u;
@@ -107,7 +108,7 @@ public class ClipboardRestController {
      * @return
      */
     @PostMapping(value = "/send-data", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String sendData(@RequestHeader(value = "id") String id,
+    public String sendData(@CookieValue(value = "clipboard.id") String id,
                            @RequestHeader(value = "data") String data) {
         id = HtmlUtils.htmlEscape(id);
         if (isInputInvalid(id)) {
@@ -134,8 +135,8 @@ public class ClipboardRestController {
      * @return successfull if the file was uploaded or an error message
      */
     @PostMapping(value = "/upload-data", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String uploadFileData(@RequestParam(value = "file") MultipartFile file,
-                                 @RequestParam(value = "id") String id) {
+    public String uploadFileData(@RequestPart(value = "file") MultipartFile file,
+                                 @CookieValue(value = "clipboard.id") String id) {
         id = HtmlUtils.htmlEscape(id);
         if (isInputInvalid(id)) {
             throw new UnauthorizedException();
@@ -156,7 +157,7 @@ public class ClipboardRestController {
      * @return stored data or unauthorized exception
      */
     @GetMapping(value = "/get-data", produces = MediaType.APPLICATION_JSON_VALUE)
-    public User getData(@RequestParam(value = "id") String id) {
+    public User getData(@CookieValue(value = "clipboard.id") String id) {
         id = HtmlUtils.htmlEscape(id);
         if (isInputInvalid(id)) {
             throw new UnauthorizedException();
@@ -176,7 +177,7 @@ public class ClipboardRestController {
     }
 
     @GetMapping(value = "/logout", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String logout(@RequestParam(value = "id") String id) {
+    public String logout(@CookieValue(value = "clipboard.id") String id) {
         id = HtmlUtils.htmlEscape(id);
         if (isInputInvalid(id)) {
             throw new UnauthorizedException();
@@ -190,13 +191,14 @@ public class ClipboardRestController {
             e.printStackTrace();
             throw new PersistenceException();
         }
+        //TODO remove ID from URL
         msgTemplate.convertAndSend("/topic/acknowledge/" + id, "logout");
         return "successful";
     }
 
     //TODO test
     @GetMapping(value = "/connected", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String testConnection(@RequestParam(value = "id") String id) {
+    public String testConnection(@CookieValue(value = "clipboard.id") String id) {
         id = HtmlUtils.htmlEscape(id);
         if (isInputInvalid(id)) {
             return "false";

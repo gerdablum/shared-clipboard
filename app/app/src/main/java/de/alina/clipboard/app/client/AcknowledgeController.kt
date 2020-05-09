@@ -19,8 +19,9 @@ class AcknowledgeController(val apiCallback: ClipboardServerAPICallback): Callba
 
     fun acknowledge(id: UUID) {
         this.id = id
-        val call = apiString.acknowledge(id.toString())
+        val call = apiString.acknowledge("clipboard.id=" + id.toString())
         call.enqueue(this)
+        Log.d(this.toString(), call.request().headers().toString())
         Log.d(this.toString(), "Requesting " + call.request().url())
     }
     override fun onFailure(call: Call<String?>?, t: Throwable?) {

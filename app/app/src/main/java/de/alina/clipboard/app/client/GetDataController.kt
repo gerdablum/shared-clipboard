@@ -14,7 +14,7 @@ import java.util.*
 class GetDataController(var apiCallback: ClipboardServerAPICallback): Callback<User?>, BaseApiController() {
 
     fun getData(id: UUID) {
-        val call = apiJSON.getData(id.toString())
+        val call = apiJSON.getData("clipboard.id=" + id.toString())
         call.enqueue(this)
         Log.d(this.toString(), "Requesting " + call.request().url())
     }

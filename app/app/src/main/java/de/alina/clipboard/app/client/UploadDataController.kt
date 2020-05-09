@@ -20,7 +20,7 @@ class UploadDataController(var apiCallback: ClipboardServerAPICallback): Callbac
     fun sendFileData(id: UUID, bytes: ByteArray, mimeType: MediaType, filename: String) {
         val file = RequestBody.create(mimeType, bytes)
         val part = MultipartBody.Part.createFormData("file", filename, file)
-        val call = apiJSON.uploadData(id.toString(), part)
+        val call = apiJSON.uploadData("clipboard.id=" + id.toString(), part)
         call.enqueue(this)
         Log.d(this.toString(), "Requesting " + call.request().url())
     }

@@ -8,8 +8,12 @@ open class User( var id: UUID?): Serializable {
     var fileUrl: String? = null
     var type: DataType? = null
 
+
+
     companion object {
         const val USER_KEY = "de.alina.clipboard.app.userKey"
     }
+
+
 
 }

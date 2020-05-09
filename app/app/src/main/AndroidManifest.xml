@@ -17,10 +17,10 @@
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning">
         <service
-            android:name=".service.CopyEventService"
+            android:name="de.alina.clipboard.app.service.CopyEventService"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
 
-        <receiver android:name=".service.CancelServiceReceiver" />
+        <receiver android:name="de.alina.clipboard.app.service.CancelServiceReceiver" />
 
         <activity
             android:name=".view.MainActivity"
