@@ -20,8 +20,10 @@ class TestAuthManager {
         `when`(context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE))
                 .thenReturn(sp)
         `when`(sp.getString(context.getString(R.string.user_auth_id_key), "")).thenReturn("")
+
         val authManager = AuthManager()
         val user = authManager.getUserKey(context)
+
         assertNull(user)
     }
 
@@ -33,8 +35,10 @@ class TestAuthManager {
         `when`(context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE))
                 .thenReturn(sp)
         `when`(sp.getString(context.getString(R.string.user_auth_id_key), "")).thenReturn(id.toString())
+
         val authManager = AuthManager()
         val user = authManager.getUserKey(context)
+
         assertEquals(user?.id, id)
     }
 
@@ -42,6 +46,7 @@ class TestAuthManager {
     fun testIsUUIDValidReturnNull() {
         val authManager = AuthManager()
         val uuid = authManager.isUUIDValid("Kuchen")
+
         assertNull(uuid)
     }
 
@@ -50,6 +55,7 @@ class TestAuthManager {
         val uuid = UUID.randomUUID().toString()
         val authManager = AuthManager()
         val testUUID = authManager.isUUIDValid(uuid)
+
         assertEquals(uuid, testUUID.toString())
     }
 }

@@ -18,25 +18,8 @@ import de.alina.clipboard.app.manager.ClipboardNotificationManager
 import de.alina.clipboard.app.model.User.Companion.USER_KEY
 import java.util.*
 
-class CopyEventService: Service(), ClipboardServerAPICallback{
+class CopyEventService(private var callback: ServiceCallback): Service() {
     lateinit var notifManager: ClipboardNotificationManager
-
-
-    private fun IbuildNotification(id: UUID): Notification {
-        val cancelIntent = Intent(this, CancelServiceReceiver::class.java)
-        cancelIntent.putExtra("blabla", id.toString())
-        val pendingIntent = PendingIntent.getBroadcast(this, 0, cancelIntent, 0)
-
-        return NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_content_copy_black_24dp)
-                .setContentTitle("SharedClipboard")
-                .setContentText("Connected to computer")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .addAction(R.drawable.ic_content_copy_black_24dp, getString(R.string.cancel_service),
-                        pendingIntent)
-
-                .build()
-    }
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -50,13 +33,12 @@ class CopyEventService: Service(), ClipboardServerAPICallback{
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         val idString = intent.getStringExtra(USER_KEY)
         val id = UUID.fromString(idString)
-        val sendDataController = SendDataController(this)
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.addPrimaryClipChangedListener {
             clipboard.primaryClip?.let {
                 val content = it.getItemAt(0)
                 if (content.text != null) {
-                    sendDataController.sendStringData(id, content.text.toString())
+                    callback.onCopyEvent(id, content.text.toString())
                 }
             }
         }
@@ -78,14 +60,6 @@ class CopyEventService: Service(), ClipboardServerAPICallback{
         super.onTaskRemoved(rootIntent)
     }
 
-    override fun onSuccess(data: Bundle, type: ClipboardServerAPICallback.CallType) {
-        Log.d("CopyEventService", "copied data from background")
-    }
-
-    override fun onFailure(data: Bundle, type: ClipboardServerAPICallback.CallType, t: Throwable?) {
-        t?.printStackTrace()
-        Log.d("CopyEventService", "failed to copy data from background")
-    }
 
     companion object {
         const val FOREGROUND_SERVICE_ID = 42

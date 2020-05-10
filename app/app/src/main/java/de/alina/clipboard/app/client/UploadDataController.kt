@@ -15,7 +15,7 @@ import java.io.File
 import java.util.*
 
 
-class UploadDataController(var apiCallback: ClipboardServerAPICallback): Callback<String?>, BaseApiController() {
+class UploadDataController(): Callback<String?>, BaseApiController() {
 
     fun sendFileData(id: UUID, bytes: ByteArray, mimeType: MediaType, filename: String) {
         val file = RequestBody.create(mimeType, bytes)
@@ -25,15 +25,22 @@ class UploadDataController(var apiCallback: ClipboardServerAPICallback): Callbac
         Log.d(this.toString(), "Requesting " + call.request().url())
     }
     override fun onFailure(call: Call<String?>, t: Throwable) {
-        apiCallback.onFailure(Bundle(), ClipboardServerAPICallback.CallType.SEND_FILE_DATA, t)
+        observers.forEach {
+            it.onFailure(Bundle(), ClipboardServerAPICallback.CallType.SEND_FILE_DATA, t)
+        }
     }
 
     override fun onResponse(call: Call<String?>, response: Response<String?>) {
         if (response.isSuccessful) {
-            apiCallback.onSuccess(Bundle(), ClipboardServerAPICallback.CallType.SEND_FILE_DATA)
+            observers.forEach {
+                it.onSuccess(Bundle(), ClipboardServerAPICallback.CallType.SEND_FILE_DATA)
+            }
+
         } else {
             Log.e("UploadDataController", "Server responded with response code " + response.code())
-            apiCallback.onFailure(Bundle(), ClipboardServerAPICallback.CallType.SEND_FILE_DATA, null)
+            observers.forEach {
+                it.onFailure(Bundle(), ClipboardServerAPICallback.CallType.SEND_FILE_DATA, null)
+            }
         }
     }
 }

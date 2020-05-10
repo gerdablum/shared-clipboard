@@ -22,21 +22,25 @@ import de.alina.clipboard.app.manager.ClipboardNotificationManager
 import de.alina.clipboard.app.manager.QRManager
 import de.alina.clipboard.app.manager.ServiceManager
 import de.alina.clipboard.app.model.User
+import de.alina.clipboard.app.service.CopyEventService
+import de.alina.clipboard.app.service.ServiceCallback
 import de.alina.clipboard.app.view.BaseView
 import okhttp3.MediaType
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import java.util.*
 
-class AppController(private val context: Activity, private val view: BaseView):  ClipboardServerAPICallback, LifecycleObserver {
+class AppController(private val context: Activity, private val view: BaseView,
+                    private val ackController: AcknowledgeController,
+                    private val logoutController: LogoutController,
+                    private val connectController: CheckConnectionController,
+                    private val uploadController: UploadDataController,
+                    private val sendDataController: SendDataController,
+                    private val authManager: AuthManager,
+                    private val serviceManager: ServiceManager,
+                    private val qrManager: QRManager,
+                    private val notifManager: ClipboardNotificationManager):  ClipboardServerAPICallback, LifecycleObserver, ServiceCallback {
 
-    private val ackController by lazy { AcknowledgeController(this)}
-    private val logoutController by lazy { LogoutController(this)}
-    private val connectController by lazy { CheckConnectionController(this) }
-    private val uploadController by lazy { UploadDataController(this) }
-    private val authManager by lazy {AuthManager()}
-    private val serviceManager by lazy {ServiceManager()}
-    private val qrManager by lazy {QRManager()}
-    private val notifManager by lazy { ClipboardNotificationManager() }
     var user: User? = null
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
@@ -54,6 +58,10 @@ class AppController(private val context: Activity, private val view: BaseView): 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
         notifManager.createNotificationChannel(context)
+        ackController.subscribe(this)
+        logoutController.subscribe(this)
+        connectController.subscribe(this)
+        uploadController.subscribe(this)
     }
 
     fun logoutUser() {
@@ -137,7 +145,10 @@ class AppController(private val context: Activity, private val view: BaseView): 
                 serviceManager.startCopyListenService(context, user)
                 view.showLoggedInSuccessful()
             }
-            ClipboardServerAPICallback.CallType.SEND_DATA -> view.showSendDataSuccessful()
+            ClipboardServerAPICallback.CallType.SEND_DATA -> {
+                Log.d(AppController::class.java.name, "copied data from background")
+                view.showSendDataSuccessful()
+            }
             ClipboardServerAPICallback.CallType.SEND_FILE_DATA -> view.showSendDataSuccessful()
             ClipboardServerAPICallback.CallType.GET_DATA -> view.showGetDataSuccessfull()
             ClipboardServerAPICallback.CallType.LOGOUT -> {
@@ -155,7 +166,10 @@ class AppController(private val context: Activity, private val view: BaseView): 
         t?.printStackTrace()
         when(type) {
             ClipboardServerAPICallback.CallType.ACKNOWLEDGE -> view.showLoginFailure()
-            ClipboardServerAPICallback.CallType.SEND_DATA -> view.showSendDataFailure()
+            ClipboardServerAPICallback.CallType.SEND_DATA -> {
+                Log.d(AppController::class.java.name, "failed to copy data from background")
+                view.showSendDataFailure()
+            }
             ClipboardServerAPICallback.CallType.SEND_FILE_DATA -> view.showSendDataFailure()
             ClipboardServerAPICallback.CallType.GET_DATA -> view.showGetDataFailure()
             ClipboardServerAPICallback.CallType.LOGOUT -> view.showLogoutFailure()
@@ -181,7 +195,17 @@ class AppController(private val context: Activity, private val view: BaseView): 
         }
     }
 
+    override fun performLogout(uuid: UUID) {
+        //serviceManager.stopCopyListenService(context, user)
+        logoutController.logout(uuid)
+    }
+
+    override fun onCopyEvent(uuid: UUID, text: String) {
+        sendDataController.sendStringData(uuid, text)
+    }
+
     companion object {
         val CAPTURE_PICTURE_REQUEST = 1
     }
+
 }

@@ -17,7 +17,7 @@ open class AuthManager {
         if (userID != "") {
             return User(UUID.fromString(userID))
         } else {
-            USER_LOGGED_IN = false
+            //USER_LOGGED_IN = false
             return null
         }
     }
@@ -27,7 +27,6 @@ open class AuthManager {
                 context.getString(R.string.preference_file_key), Context.MODE_PRIVATE).edit()
         editor.putString(context.getString(R.string.user_auth_id_key), "")
         editor.apply()
-        USER_LOGGED_IN = false
     }
 
     fun getUserIDfromServerAndStore(data: Bundle, context: Context): User? {
@@ -38,7 +37,6 @@ open class AuthManager {
                     context.getString(R.string.preference_file_key), Context.MODE_PRIVATE).edit()
             editor.putString(context.getString(R.string.user_auth_id_key), it)
             editor.apply()
-            USER_LOGGED_IN = true
         }
         return user
     }
@@ -49,9 +47,5 @@ open class AuthManager {
         } catch (e: Exception) {
             return null
         }
-    }
-
-    companion object {
-        var USER_LOGGED_IN = false
     }
 }

@@ -12,8 +12,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.*
+import kotlin.collections.ArrayList
 
-class AcknowledgeController(val apiCallback: ClipboardServerAPICallback): Callback<String?>, BaseApiController() {
+class AcknowledgeController(): Callback<String?>, BaseApiController() {
 
     var id: UUID? = null
 
@@ -25,20 +26,29 @@ class AcknowledgeController(val apiCallback: ClipboardServerAPICallback): Callba
         Log.d(this.toString(), "Requesting " + call.request().url())
     }
     override fun onFailure(call: Call<String?>?, t: Throwable?) {
-        apiCallback.onFailure(Bundle(), ClipboardServerAPICallback.CallType.ACKNOWLEDGE, t)
+        for (observer in observers) {
+            observer.onFailure(Bundle(), ClipboardServerAPICallback.CallType.ACKNOWLEDGE, t)
+        }
+
     }
 
     override fun onResponse(call: Call<String?>?, response: Response<String?>?) {
         if (response?.isSuccessful == true) {
             val data = Bundle()
             data.putString(CALLBACK_ID_KEY, id?.toString())
-            apiCallback.onSuccess(data, ClipboardServerAPICallback.CallType.ACKNOWLEDGE)
+            for (observer in observers) {
+                observer.onSuccess(data, ClipboardServerAPICallback.CallType.ACKNOWLEDGE)
+            }
+
 
         } else {
             Log.e("AcknowledgeController", "Server responded with response code " + response?.code())
             val data = Bundle()
             data.putInt(CALLBACK_KEY_ERROR_CODE, response?.code() ?: 0)
-            apiCallback.onFailure(data, ClipboardServerAPICallback.CallType.ACKNOWLEDGE, null)
+            for (observer in observers) {
+                observer.onFailure(data, ClipboardServerAPICallback.CallType.ACKNOWLEDGE, null)
+            }
+
         }
     }
 }

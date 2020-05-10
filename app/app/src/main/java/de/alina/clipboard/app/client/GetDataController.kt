@@ -11,7 +11,7 @@ import java.io.File
 import java.util.*
 
 
-class GetDataController(var apiCallback: ClipboardServerAPICallback): Callback<User?>, BaseApiController() {
+class GetDataController(): Callback<User?>, BaseApiController() {
 
     fun getData(id: UUID) {
         val call = apiJSON.getData("clipboard.id=" + id.toString())
@@ -19,7 +19,9 @@ class GetDataController(var apiCallback: ClipboardServerAPICallback): Callback<U
         Log.d(this.toString(), "Requesting " + call.request().url())
     }
     override fun onFailure(call: Call<User?>, t: Throwable) {
-        apiCallback.onFailure(Bundle(), ClipboardServerAPICallback.CallType.GET_DATA, t)
+        observers.forEach {
+            it.onFailure(Bundle(), ClipboardServerAPICallback.CallType.GET_DATA, t)
+        }
     }
 
     override fun onResponse(call: Call<User?>, response: Response<User?>) {
@@ -27,10 +29,14 @@ class GetDataController(var apiCallback: ClipboardServerAPICallback): Callback<U
             val user = response.body()
             val data = Bundle()
             data.putSerializable(CALLBACK_KEY_USER, user)
-            apiCallback.onSuccess(data, ClipboardServerAPICallback.CallType.GET_DATA)
+            observers.forEach {
+                it.onSuccess(data, ClipboardServerAPICallback.CallType.GET_DATA)
+            }
         } else {
             Log.e("GetDataController", "Server responded with response code " + response.code())
-            apiCallback.onFailure(Bundle(), ClipboardServerAPICallback.CallType.GET_DATA, null)
+            observers.forEach {
+                it.onFailure(Bundle(), ClipboardServerAPICallback.CallType.GET_DATA, null)
+            }
         }
     }
 }

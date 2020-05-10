@@ -13,7 +13,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
 
-class SendDataController(val apiCallback: ClipboardServerAPICallback): Callback<String?>, BaseApiController(){
+class SendDataController(): Callback<String?>, BaseApiController(){
 
     fun sendStringData(id: UUID, stringData: String) {
         val call = apiJSON.sendData("clipboard.id=" + id.toString(), Html.escapeHtml(stringData))
@@ -21,17 +21,24 @@ class SendDataController(val apiCallback: ClipboardServerAPICallback): Callback<
         Log.d(this.toString(), "Requesting " + call.request().url())
     }
     override fun onFailure(call: Call<String?>?, t: Throwable?) {
-        apiCallback.onFailure(Bundle(), ClipboardServerAPICallback.CallType.SEND_DATA, t)
+        observers.forEach {
+            it.onFailure(Bundle(), ClipboardServerAPICallback.CallType.SEND_DATA, t)
+        }
+
     }
 
     override fun onResponse(call: Call<String?>?, response: Response<String?>?) {
         if (response?.isSuccessful == true) {
-            apiCallback.onSuccess(Bundle(), ClipboardServerAPICallback.CallType.SEND_DATA)
+            observers.forEach {
+                it.onSuccess(Bundle(), ClipboardServerAPICallback.CallType.SEND_DATA)
+            }
         } else {
             val data = Bundle()
             data.putInt(ClipboardServerAPICallback.CALLBACK_KEY_ERROR_CODE, response?.code() ?: 0)
             Log.e("SendDataController", "Server responded with response code" + response?.code())
-            apiCallback.onFailure(data, ClipboardServerAPICallback.CallType.SEND_DATA, null)
+            observers.forEach {
+                it.onFailure(data, ClipboardServerAPICallback.CallType.SEND_DATA, null)
+            }
         }
     }
 }

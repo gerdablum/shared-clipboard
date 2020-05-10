@@ -7,7 +7,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
 
-open class CheckConnectionController(val apiCallback: ClipboardServerAPICallback): Callback<String?>, BaseApiController() {
+open class CheckConnectionController(): Callback<String?>, BaseApiController() {
 
     fun isConnected(id: UUID) {
         val call = apiString.testConnection("clipboard.id=" + id.toString())
@@ -16,22 +16,30 @@ open class CheckConnectionController(val apiCallback: ClipboardServerAPICallback
 
     }
     override fun onFailure(call: Call<String?>, t: Throwable) {
-        apiCallback.onFailure(Bundle(), ClipboardServerAPICallback.CallType.CONNECTION, t)
+        observers.forEach() {
+            it.onFailure(Bundle(), ClipboardServerAPICallback.CallType.CONNECTION, t)
+        }
     }
 
     override fun onResponse(call: Call<String?>, response: Response<String?>) {
         if (response.isSuccessful) {
             if (response.body() == "true") {
-                apiCallback.onSuccess(Bundle(), ClipboardServerAPICallback.CallType.CONNECTION)
+                observers.forEach() {
+                    it.onSuccess(Bundle(), ClipboardServerAPICallback.CallType.CONNECTION)
+                }
             } else {
                 Log.d("TestConnectionControlle", "Connection not longer alive.")
-                apiCallback.onFailure(Bundle(), ClipboardServerAPICallback.CallType.CONNECTION, null)
+                observers.forEach() {
+                    it.onFailure(Bundle(), ClipboardServerAPICallback.CallType.CONNECTION, null)
+                }
             }
         } else {
             val data = Bundle()
-            data.putInt(ClipboardServerAPICallback.CALLBACK_KEY_ERROR_CODE, response?.code() ?: 0)
-            Log.d("TestConnectionControlle", "Server responded with response code " + response?.code())
-            apiCallback.onFailure(data, ClipboardServerAPICallback.CallType.CONNECTION, null)
+            data.putInt(ClipboardServerAPICallback.CALLBACK_KEY_ERROR_CODE, response.code() ?: 0)
+            Log.d("TestConnectionControlle", "Server responded with response code " + response.code())
+            observers.forEach() {
+                it.onFailure(data, ClipboardServerAPICallback.CallType.CONNECTION, null)
+            }
         }
     }
 }

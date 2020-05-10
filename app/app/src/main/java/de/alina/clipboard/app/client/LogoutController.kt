@@ -9,7 +9,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.*
 
-class LogoutController(val apiCallback: ClipboardServerAPICallback): Callback<String?>, BaseApiController() {
+class LogoutController(): Callback<String?>, BaseApiController() {
 
     fun logout(id: UUID) {
         val call = apiString.logout("clipboard.id=" + id.toString())
@@ -17,15 +17,21 @@ class LogoutController(val apiCallback: ClipboardServerAPICallback): Callback<St
         Log.d(this.toString(), "Requesting " + call.request().url())
     }
     override fun onFailure(call: Call<String?>?, t: Throwable?) {
-        apiCallback.onFailure(Bundle(), ClipboardServerAPICallback.CallType.LOGOUT, t)
+        observers.forEach {
+            it.onFailure(Bundle(), ClipboardServerAPICallback.CallType.LOGOUT, t)
+        }
     }
 
     override fun onResponse(call: Call<String?>?, response: Response<String?>?) {
         if (response?.isSuccessful == true) {
-            apiCallback.onSuccess(Bundle(), ClipboardServerAPICallback.CallType.LOGOUT)
+            observers.forEach {
+                it.onSuccess(Bundle(), ClipboardServerAPICallback.CallType.LOGOUT)
+            }
         } else {
             Log.e("LogoutController", "Server responded with response code " + response?.code())
-            apiCallback.onFailure(Bundle(), ClipboardServerAPICallback.CallType.LOGOUT, null)
+            observers.forEach {
+                it.onFailure(Bundle(), ClipboardServerAPICallback.CallType.LOGOUT, null)
+            }
         }
     }
 }

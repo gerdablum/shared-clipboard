@@ -7,15 +7,29 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import de.alina.clipboard.app.R
+import de.alina.clipboard.app.client.*
 import de.alina.clipboard.app.controller.AppController
 import de.alina.clipboard.app.controller.AppController.Companion.CAPTURE_PICTURE_REQUEST
+import de.alina.clipboard.app.manager.AuthManager
+import de.alina.clipboard.app.manager.ClipboardNotificationManager
+import de.alina.clipboard.app.manager.QRManager
+import de.alina.clipboard.app.manager.ServiceManager
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 
 class MainActivity : AppCompatActivity(), BaseView {
 
-    private val controller = AppController(this, this)
+    private val controller = AppController(this, this,
+            AcknowledgeController(),
+            LogoutController(),
+            CheckConnectionController(),
+            UploadDataController(),
+            SendDataController(),
+            AuthManager(),
+            ServiceManager(),
+            QRManager(),
+            ClipboardNotificationManager())
 
     init {
         lifecycle.addObserver(controller)

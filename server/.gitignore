@@ -1,7 +1,7 @@
 *.iml
-/.gradle
-/.mvn
-/.idea
+./.gradle
+./.mvn
+./.idea
 /local.properties
 /build
 /out

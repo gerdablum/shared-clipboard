@@ -10,7 +10,7 @@ import de.alina.clipboard.app.client.ClipboardServerAPICallback
 import de.alina.clipboard.app.client.LogoutController
 import java.util.*
 
-class CancelServiceReceiver: BroadcastReceiver(), ClipboardServerAPICallback {
+class CancelServiceReceiver(private val callback: ServiceCallback): BroadcastReceiver() {
 
     private var context: Context? = null
 
@@ -19,13 +19,13 @@ class CancelServiceReceiver: BroadcastReceiver(), ClipboardServerAPICallback {
                 context.getString(R.string.preference_file_key), Context.MODE_PRIVATE)
         sharedPref?.getString(context.getString(R.string.user_auth_id_key), "")?.let {
             val uuid = UUID.fromString(it)
-            LogoutController(this).logout(uuid)
+            callback.performLogout(uuid)
         }
         this.context = context
 
     }
 
-    override fun onSuccess(data: Bundle, type: ClipboardServerAPICallback.CallType) {
+    /*override fun onSuccess(data: Bundle, type: ClipboardServerAPICallback.CallType) {
         val editor = context?.getSharedPreferences(
                 context?.getString(R.string.preference_file_key), Context.MODE_PRIVATE)?.edit()
         editor?.putString(context?.getString(R.string.user_auth_id_key), "")
@@ -39,6 +39,6 @@ class CancelServiceReceiver: BroadcastReceiver(), ClipboardServerAPICallback {
         val intent = Intent(context, CopyEventService::class.java)
         context?.stopService(intent)
         Log.e("CancelServiceReceiver", "Logout failed.")
-    }
+    }*/
 
 }
