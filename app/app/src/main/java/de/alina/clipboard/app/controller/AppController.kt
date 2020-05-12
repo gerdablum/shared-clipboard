@@ -16,11 +16,8 @@ import android.os.Parcelable
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
-import de.alina.clipboard.app.manager.AuthManager
 import de.alina.clipboard.app.client.*
-import de.alina.clipboard.app.manager.ClipboardNotificationManager
-import de.alina.clipboard.app.manager.QRManager
-import de.alina.clipboard.app.manager.ServiceManager
+import de.alina.clipboard.app.manager.*
 import de.alina.clipboard.app.model.User
 import de.alina.clipboard.app.service.CopyEventService
 import de.alina.clipboard.app.service.ServiceCallback
@@ -114,13 +111,16 @@ class AppController(private val context: Activity, private val view: BaseView,
     fun processImage(data: Intent?) {
         data?.let {
             val imageBitmap = data.extras?.get("data") as Bitmap
-            val id = qrManager.scanQRCode(imageBitmap)
-            val uuid = authManager.isUUIDValid(id);
-            if (uuid != null) {
-                ackController.acknowledge(uuid)
-            } else {
-                view.showLoginFailure()
-            }
+            qrManager.scanQRCode(imageBitmap, (object: QRInterface {
+                override fun onQRScanFinished(id: String?) {
+                    val uuid = authManager.isUUIDValid(id);
+                    if (uuid != null) {
+                        ackController.acknowledge(uuid)
+                    } else {
+                        view.showLoginFailure()
+                    }
+                }
+            }))
         }
     }
 

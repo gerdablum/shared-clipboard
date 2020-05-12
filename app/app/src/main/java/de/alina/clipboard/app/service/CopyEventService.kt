@@ -18,14 +18,15 @@ import de.alina.clipboard.app.manager.ClipboardNotificationManager
 import de.alina.clipboard.app.model.User.Companion.USER_KEY
 import java.util.*
 
-class CopyEventService(private var callback: ServiceCallback): Service() {
+class CopyEventService: Service(), ClipboardServerAPICallback{
     lateinit var notifManager: ClipboardNotificationManager
-
+    
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 
     override fun onCreate() {
+        notifManager = ClipboardNotificationManager()
         isRunning = false
         super.onCreate()
     }
@@ -33,12 +34,14 @@ class CopyEventService(private var callback: ServiceCallback): Service() {
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         val idString = intent.getStringExtra(USER_KEY)
         val id = UUID.fromString(idString)
+        val sendDataController = SendDataController()
+        sendDataController.subscribe(this)
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.addPrimaryClipChangedListener {
             clipboard.primaryClip?.let {
                 val content = it.getItemAt(0)
                 if (content.text != null) {
-                    callback.onCopyEvent(id, content.text.toString())
+                    sendDataController.sendStringData(id, content.text.toString())
                 }
             }
         }
@@ -60,6 +63,14 @@ class CopyEventService(private var callback: ServiceCallback): Service() {
         super.onTaskRemoved(rootIntent)
     }
 
+    override fun onSuccess(data: Bundle, type: ClipboardServerAPICallback.CallType) {
+        Log.d("CopyEventService", "copied data from background")
+    }
+
+    override fun onFailure(data: Bundle, type: ClipboardServerAPICallback.CallType, t: Throwable?) {
+        t?.printStackTrace()
+        Log.d("CopyEventService", "failed to copy data from background")
+    }
 
     companion object {
         const val FOREGROUND_SERVICE_ID = 42

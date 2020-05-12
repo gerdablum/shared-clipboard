@@ -40,10 +40,10 @@ dependencies {
 
     // QR code reading
     //implementation 'com.google.firebase:firebase-ml-vision-image-label-model:20.0.1'
-    implementation "com.google.firebase:firebase-ml-model-interpreter:22.0.3"
-    implementation "com.google.firebase:firebase-ml-vision:24.0.3"
-    implementation 'com.google.firebase:firebase-core:17.4.1'
-    implementation 'com.google.android.gms:play-services-vision:20.0.0'
+    //implementation "com.google.firebase:firebase-ml-model-interpreter:22.0.3"
+    implementation 'com.google.firebase:firebase-ml-vision:17.0.0'
+    implementation 'com.google.firebase:firebase-core:16.0.3'
+    //implementation 'com.google.firebase:firebase-core:17.4.1'
 
     // retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
