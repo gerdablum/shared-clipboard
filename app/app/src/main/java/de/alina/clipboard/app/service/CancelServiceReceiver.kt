@@ -8,37 +8,20 @@ import android.util.Log
 import de.alina.clipboard.app.R
 import de.alina.clipboard.app.client.ClipboardServerAPICallback
 import de.alina.clipboard.app.client.LogoutController
+import de.alina.clipboard.app.manager.AuthManager
+import de.alina.clipboard.app.manager.ServiceManager
 import java.util.*
 
-class CancelServiceReceiver(private val callback: ServiceCallback): BroadcastReceiver() {
-
-    private var context: Context? = null
+class CancelServiceReceiver(): BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        val sharedPref = context?.getSharedPreferences(
-                context.getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-        sharedPref?.getString(context.getString(R.string.user_auth_id_key), "")?.let {
-            val uuid = UUID.fromString(it)
-            callback.performLogout(uuid)
+        val serviceManager = ServiceManager()
+        if (context == null) {
+            Log.e("CancelServiceReceiver", "Failed to stop foreground service")
+        } else {
+            serviceManager.stopCopyListenService(context)
         }
-        this.context = context
 
     }
-
-    /*override fun onSuccess(data: Bundle, type: ClipboardServerAPICallback.CallType) {
-        val editor = context?.getSharedPreferences(
-                context?.getString(R.string.preference_file_key), Context.MODE_PRIVATE)?.edit()
-        editor?.putString(context?.getString(R.string.user_auth_id_key), "")
-        editor?.apply()
-        val intent = Intent(context, CopyEventService::class.java)
-        context?.stopService(intent)
-    }
-
-    override fun onFailure(data: Bundle, type: ClipboardServerAPICallback.CallType, t: Throwable?) {
-        t?.printStackTrace()
-        val intent = Intent(context, CopyEventService::class.java)
-        context?.stopService(intent)
-        Log.e("CancelServiceReceiver", "Logout failed.")
-    }*/
 
 }

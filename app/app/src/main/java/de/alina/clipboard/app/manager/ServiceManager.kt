@@ -3,6 +3,7 @@ package de.alina.clipboard.app.manager
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import de.alina.clipboard.app.model.User
 import de.alina.clipboard.app.service.CopyEventService
 
@@ -24,6 +25,11 @@ open class ServiceManager {
     fun stopCopyListenService(context: Context, user: User?) {
         val intent = Intent(context, CopyEventService::class.java)
         intent.putExtra(User.USER_KEY, user?.id.toString())
+        context.stopService(intent)
+    }
+
+    fun stopCopyListenService(context: Context) {
+        val intent = Intent(context, CopyEventService::class.java)
         context.stopService(intent)
     }
 }

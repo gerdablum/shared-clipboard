@@ -14,7 +14,7 @@ import java.util.*
 class TestAuthManager {
 
     @Test
-    fun testGetUserKeyReturnNull() {
+    fun testGetUserKey_ReturnNull() {
         val context = mock(Context::class.java)
         val sp = mock(SharedPreferences::class.java)
         `when`(context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE))
@@ -28,7 +28,7 @@ class TestAuthManager {
     }
 
     @Test
-    fun testGetUserKeyReturnValidUser() {
+    fun testGetUserKey_ReturnValidUser() {
         val id = UUID.randomUUID()
         val context = mock(Context::class.java)
         val sp = mock(SharedPreferences::class.java)
@@ -43,7 +43,7 @@ class TestAuthManager {
     }
 
     @Test
-    fun testIsUUIDValidReturnNull() {
+    fun testIsUUIDValid_ReturnNull() {
         val authManager = AuthManager()
         val uuid = authManager.isUUIDValid("Kuchen")
 
@@ -51,7 +51,7 @@ class TestAuthManager {
     }
 
     @Test
-    fun testIsUUIDValidReturnValue() {
+    fun testIsUUIDValid_ReturnValue() {
         val uuid = UUID.randomUUID().toString()
         val authManager = AuthManager()
         val testUUID = authManager.isUUIDValid(uuid)

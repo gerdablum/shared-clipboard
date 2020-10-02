@@ -10,10 +10,7 @@ import de.alina.clipboard.app.R
 import de.alina.clipboard.app.client.*
 import de.alina.clipboard.app.controller.AppController
 import de.alina.clipboard.app.controller.AppController.Companion.CAPTURE_PICTURE_REQUEST
-import de.alina.clipboard.app.manager.AuthManager
-import de.alina.clipboard.app.manager.ClipboardNotificationManager
-import de.alina.clipboard.app.manager.QRManager
-import de.alina.clipboard.app.manager.ServiceManager
+import de.alina.clipboard.app.manager.*
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
@@ -29,7 +26,8 @@ class MainActivity : AppCompatActivity(), BaseView {
             AuthManager(),
             ServiceManager(),
             QRManager(),
-            ClipboardNotificationManager())
+            ClipboardNotificationManager(),
+            FileManager())
 
     init {
         lifecycle.addObserver(controller)
@@ -67,7 +65,7 @@ class MainActivity : AppCompatActivity(), BaseView {
         Toast.makeText(this, getString(R.string.send_Data_successful), Toast.LENGTH_LONG).show()
     }
 
-    override fun showGetDataSuccessfull() {
+    override fun showGetDataSuccessful() {
         // TODO: wait for server implementation and copy to local clipboard
     }
 

@@ -9,7 +9,7 @@ interface BaseView {
     fun showNoInternetConnection()
     fun showSendDataSuccessful()
     fun showSendDataFailure()
-    fun showGetDataSuccessfull()
+    fun showGetDataSuccessful()
     fun showGetDataFailure()
     fun showFailure()
 }
