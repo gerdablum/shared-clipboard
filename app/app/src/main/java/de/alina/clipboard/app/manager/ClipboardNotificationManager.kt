@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
+import androidx.core.app.TaskStackBuilder
 import de.alina.clipboard.app.R
 import de.alina.clipboard.app.view.MainActivity
 import java.util.*
@@ -31,10 +32,14 @@ open class ClipboardNotificationManager {
     }
 
     fun buildNotification(id: UUID, context: Context, cancelIntent: Intent): Notification {
-        cancelIntent.putExtra("blabla", id.toString())
-        val pendingIntent = PendingIntent.getBroadcast(context, 0, cancelIntent, 0)
-
-        return NotificationCompat.Builder(context, MainActivity.CHANNEL_ID)
+        cancelIntent.putExtra( DISCONNECT_REQUESTED_KEY, true)
+        val pendingIntent  = TaskStackBuilder.create(context).run {
+            // Add the intent, which inflates the back stack
+            addNextIntentWithParentStack(cancelIntent)
+            // Get the PendingIntent containing the entire back stack
+            getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+            return NotificationCompat.Builder(context, MainActivity.CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_content_copy_black_24dp)
                 .setContentTitle("SharedClipboard")
                 .setContentText("Connected to computer")
@@ -43,5 +48,9 @@ open class ClipboardNotificationManager {
                         pendingIntent)
 
                 .build()
+    }
+
+    companion object {
+        const val DISCONNECT_REQUESTED_KEY = "de.alina.clipboard.app.disconnectRequested"
     }
 }

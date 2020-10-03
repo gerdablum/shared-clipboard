@@ -19,6 +19,7 @@ import de.alina.clipboard.app.manager.*
 import de.alina.clipboard.app.model.User
 import de.alina.clipboard.app.view.BaseView
 import okhttp3.MediaType
+import java.util.*
 
 class AppController(private val context: Activity, private val view: BaseView,
                     private val ackController: AcknowledgeController,
@@ -32,8 +33,6 @@ class AppController(private val context: Activity, private val view: BaseView,
                     private val notifManager: ClipboardNotificationManager,
                     private val fileManager: FileManager) : ClipboardServerAPICallback, LifecycleObserver {
 
-    var user: User? = null
-
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
         notifManager.createNotificationChannel(context)
@@ -45,25 +44,44 @@ class AppController(private val context: Activity, private val view: BaseView,
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     fun onResume() {
-        user = authManager.getUserKey(context)
+        // user = authManager.getUserKey(context)
         if (!hasInternetConnection()) {
             view.showNoInternetConnection()
         }
+
+        val user = authManager.getActiveUser(context)
+
+        // user is already logged out
         if (user == null) {
             view.showLogoutSuccessful()
         }
-        user?.id?.let { connectController.isConnected(it) }
+        // user requested logout but it failed
+        else if (user != null && authManager.logoutRequested(context)) {
+            logoutUser()
+        }
+        // user is logged in successfully
+        else if (user != null) {
+            user.id?.let { connectController.isConnected(it) }
+            view.showLoggedInSuccessful()
+        }
+
     }
 
     fun logoutUser() {
-        val id = user?.id
-        if (id != null) {
-            logoutController.logout(id)
+        val user = authManager.getActiveUser(context)
+        authManager.logoutUser(context)
+        if (user != null) {
+            user.id?.let {
+                logoutController.logout(it)
+            }
+            serviceManager.stopCopyListenService(context)
+            view.showLogoutSuccessful()
         }
+
     }
 
     fun uploadBytes(fileUri: Uri, mimeType: MediaType) {
-        user = authManager.getUserKey(context)
+        val user = authManager.getActiveUser(context)
         val inputStream = context.contentResolver.openInputStream(fileUri)
         val byteArray = fileManager.getBytes(inputStream)
         val filename = fileManager.getFilename(context, fileUri)
@@ -109,15 +127,18 @@ class AppController(private val context: Activity, private val view: BaseView,
             ClipboardServerAPICallback.CallType.SEND_FILE_DATA -> view.showSendDataSuccessful()
             ClipboardServerAPICallback.CallType.GET_DATA -> view.showGetDataSuccessful()
             ClipboardServerAPICallback.CallType.LOGOUT -> onLogoutSuccessful()
-            ClipboardServerAPICallback.CallType.CONNECTION -> serviceManager.startCopyListenService(context, user)
+            ClipboardServerAPICallback.CallType.CONNECTION -> {
+                authManager.getActiveUser(context)?.let {
+                    serviceManager.startCopyListenService(context, it)
+                }
+
+            }
         }
     }
 
     private fun onLogoutSuccessful() {
-        authManager.logoutUser(context)
-        serviceManager.stopCopyListenService(context, user)
-        user = null
-        view.showLogoutSuccessful()
+        authManager.deleteUserData(context)
+        Log.d(AppController::class.java.name, "User logged out successful")
     }
 
     private fun onSendDataSuccessful() {
@@ -127,8 +148,8 @@ class AppController(private val context: Activity, private val view: BaseView,
 
     private fun onAckSuccessful(data: Bundle) {
         data.getString(ClipboardServerAPICallback.CALLBACK_ID_KEY)?.let {
-            user = authManager.storeUserId(it, context)
-            serviceManager.startCopyListenService(context, user)
+            authManager.storeUser(it, context)
+            serviceManager.startCopyListenService(context, authManager.getActiveUser(context) )
             view.showLoggedInSuccessful()
         }
     }
@@ -146,7 +167,9 @@ class AppController(private val context: Activity, private val view: BaseView,
             ClipboardServerAPICallback.CallType.GET_DATA -> view.showGetDataFailure()
             ClipboardServerAPICallback.CallType.LOGOUT -> view.showLogoutFailure()
             ClipboardServerAPICallback.CallType.CONNECTION -> {
-                logoutUser()
+                authManager.getActiveUser(context)?.let {
+                    logoutUser()
+                }
                 view.showLogoutSuccessful()
             }
         }
@@ -155,13 +178,12 @@ class AppController(private val context: Activity, private val view: BaseView,
     fun handleShareImageEvent(intent: Intent) {
         if (intent.type == "text/plain") {
             Log.d("ShareActivity", "text shared")
-        } else if (intent.type.contains("image/")) {
+        }
+        else if (intent.type.contains("image/") || intent.type == "application/pdf") {
             (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let {
                 uploadBytes(it, MediaType.parse(intent.type)!!)
                 Log.d("MainActivity", "image shared")
             }
-        } else if (intent.type == "application/pdf") {
-
         }
     }
 

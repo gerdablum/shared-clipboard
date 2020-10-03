@@ -44,12 +44,15 @@ class MainActivity : AppCompatActivity(), BaseView {
         button_logout.setOnClickListener {
             controller.logoutUser()
         }
-        when {
-            intent?.action == Intent.ACTION_SEND -> {
+        val disconnectClicked = intent.getBooleanExtra(
+                ClipboardNotificationManager.DISCONNECT_REQUESTED_KEY,false)
+        if (intent?.action == Intent.ACTION_SEND) {
                 controller.handleShareImageEvent(intent)
-            }
-            else -> Log.d("MainActivity", "do nothing")
         }
+        if (disconnectClicked) {
+            controller.logoutUser()
+        }
+        else Log.d("MainActivity", "do nothing")
     }
 
     override fun showLoginFailure() {

@@ -14,4 +14,5 @@
     <string name="channel_name">General notifications</string>
     <string name="channel_description">Notify about the connection status.</string>
     <string name="cancel_service">disconnect</string>
+    <string name="user_auth_request_logout_key">de.alina.clipboard.app.logoutRequested</string>
 </resources>
