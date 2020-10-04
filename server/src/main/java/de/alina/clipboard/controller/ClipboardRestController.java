@@ -191,7 +191,6 @@ public class ClipboardRestController {
             e.printStackTrace();
             throw new PersistenceException();
         }
-        //TODO remove ID from URL
         msgTemplate.convertAndSend("/topic/acknowledge/" + id, "logout");
         return "successful";
     }

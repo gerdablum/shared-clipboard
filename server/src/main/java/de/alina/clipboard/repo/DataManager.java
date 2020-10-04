@@ -15,7 +15,9 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -78,6 +80,8 @@ public class DataManager implements IDataManager {
         if (redisTemplate.hasKey(USER_ID + userID) && redisTemplate.hasKey(TYPE + userID)) {
             redisTemplate.delete(USER_ID + userID);
             redisTemplate.delete(TYPE + userID);
+            deleteAllFiles(userID);
+            return true;
         }
         return false;
     }
@@ -100,8 +104,10 @@ public class DataManager implements IDataManager {
     @Override
     public void storeFile(MultipartFile file, UUID userID) throws IOException{
         byte[] bytes = file.getBytes();
+        // delete previously shared files from server
+        deleteAllFiles(userID);
         String filename = UPLOADED_FOLDER + userID.toString() + file.getOriginalFilename();
-        if (filename.contains("..")) {
+        if (filename.contains("../")) {
             throw new IllegalArgumentException("Cannot store file outside directory");
         }
         Path path = Paths.get(filename);
@@ -110,18 +116,7 @@ public class DataManager implements IDataManager {
         u.type = DataType.FILE;
         u.fileUrl = filename;
         saveData(u);
-        new Thread( new Runnable() {
-            public void run()  {
-                try  { Thread.sleep(TimeUnit.MINUTES.toMillis(SESSION_TIMEOUT) ); }
-                catch (InterruptedException ie)  {}
-                try {
-                    Files.delete(path);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    // TODO ensure that file gets deleted!!
-                }
-            }
-        } ).start();
+        deleteFileAfterDelay(path);
     }
 
     @Override
@@ -155,5 +150,32 @@ public class DataManager implements IDataManager {
         long expire = redisTemplate.getExpire(key);
         redisTemplate.opsForValue().set(key, value);
         redisTemplate.expire(key, expire, TimeUnit.SECONDS);
+    }
+
+    private void deleteAllFiles(UUID userID) {
+        File folder = new File(UPLOADED_FOLDER);
+        List<File> listOfFiles = Arrays.asList(folder.listFiles());
+        listOfFiles.forEach(file -> {
+            if (file.getName().contains(userID.toString())) {
+                file.delete();
+            }
+        });
+    }
+
+    // TODO this is not a very clean solution
+    private void deleteFileAfterDelay(Path path) {
+        new Thread( new Runnable() {
+            public void run()  {
+                try  { Thread.sleep(TimeUnit.MINUTES.toMillis(SESSION_TIMEOUT) ); }
+                catch (InterruptedException ie)  {
+                    ie.printStackTrace();
+                }
+                try {
+                    Files.delete(path);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        } ).start();
     }
 }
