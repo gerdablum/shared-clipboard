@@ -18,13 +18,9 @@ import kotlinx.android.synthetic.main.content_main.*
 class MainActivity : AppCompatActivity(), BaseView {
 
     private val controller = AppController(this, this,
-            AcknowledgeController(),
-            LogoutController(),
-            CheckConnectionController(),
-            UploadDataController(),
-            SendDataController(),
+            APIManagerImpl(),
             AuthManager(),
-            ServiceManager(),
+            BackgroundServiceManager(),
             QRManager(),
             ClipboardNotificationManager(),
             FileManager())

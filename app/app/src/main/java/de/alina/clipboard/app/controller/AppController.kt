@@ -16,35 +16,25 @@ import android.provider.MediaStore
 import android.util.Log
 import de.alina.clipboard.app.client.*
 import de.alina.clipboard.app.manager.*
-import de.alina.clipboard.app.model.User
 import de.alina.clipboard.app.view.BaseView
 import okhttp3.MediaType
-import java.util.*
 
 class AppController(private val context: Activity, private val view: BaseView,
-                    private val ackController: AcknowledgeController,
-                    private val logoutController: LogoutController,
-                    private val connectController: CheckConnectionController,
-                    private val uploadController: UploadDataController,
-                    private val sendDataController: SendDataController,
+                    private val apiController: APIManager,
                     private val authManager: AuthManager,
-                    private val serviceManager: ServiceManager,
+                    private val serviceManager: BackgroundServiceManager,
                     private val qrManager: QRManager,
                     private val notifManager: ClipboardNotificationManager,
-                    private val fileManager: FileManager) : ClipboardServerAPICallback, LifecycleObserver {
+                    private val fileManager: FileManager) : APIManagerCallback, LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
         notifManager.createNotificationChannel(context)
-        ackController.subscribe(this)
-        logoutController.subscribe(this)
-        connectController.subscribe(this)
-        uploadController.subscribe(this)
+        apiController.subscribe(this)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     fun onResume() {
-        // user = authManager.getUserKey(context)
         if (!hasInternetConnection()) {
             view.showNoInternetConnection()
         }
@@ -61,7 +51,7 @@ class AppController(private val context: Activity, private val view: BaseView,
         }
         // user is logged in successfully
         else if (user != null) {
-            user.id?.let { connectController.isConnected(it) }
+            user.id?.let { apiController.isConnected(it) }
             view.showLoggedInSuccessful()
         }
 
@@ -72,7 +62,7 @@ class AppController(private val context: Activity, private val view: BaseView,
         authManager.logoutUser(context)
         if (user != null) {
             user.id?.let {
-                logoutController.logout(it)
+                apiController.logout(it)
             }
             serviceManager.stopCopyListenService(context)
             view.showLogoutSuccessful()
@@ -86,7 +76,7 @@ class AppController(private val context: Activity, private val view: BaseView,
         val byteArray = fileManager.getBytes(inputStream)
         val filename = fileManager.getFilename(context, fileUri)
         user?.id?.let {
-            uploadController.sendFileData(it, byteArray, mimeType, filename ?: "unknown-file")
+            apiController.sendFileData(it, byteArray, mimeType, filename ?: "unknown-file")
         }
     }
 
@@ -111,7 +101,7 @@ class AppController(private val context: Activity, private val view: BaseView,
                 override fun onQRScanFinished(id: String?) {
                     val uuid = authManager.isUUIDValid(id);
                     if (uuid != null) {
-                        ackController.acknowledge(uuid)
+                        apiController.acknowledge(uuid)
                     } else {
                         view.showLoginFailure()
                     }
@@ -120,14 +110,14 @@ class AppController(private val context: Activity, private val view: BaseView,
         }
     }
 
-    override fun onSuccess(data: Bundle, type: ClipboardServerAPICallback.CallType) {
+    override fun onSuccess(data: Bundle, type: APIManagerCallback.CallType) {
         when (type) {
-            ClipboardServerAPICallback.CallType.ACKNOWLEDGE -> onAckSuccessful(data)
-            ClipboardServerAPICallback.CallType.SEND_DATA -> onSendDataSuccessful()
-            ClipboardServerAPICallback.CallType.SEND_FILE_DATA -> view.showSendDataSuccessful()
-            ClipboardServerAPICallback.CallType.GET_DATA -> view.showGetDataSuccessful()
-            ClipboardServerAPICallback.CallType.LOGOUT -> onLogoutSuccessful()
-            ClipboardServerAPICallback.CallType.CONNECTION -> {
+            APIManagerCallback.CallType.ACKNOWLEDGE -> onAckSuccessful(data)
+            APIManagerCallback.CallType.SEND_DATA -> onSendDataSuccessful()
+            APIManagerCallback.CallType.SEND_FILE_DATA -> view.showSendDataSuccessful()
+            APIManagerCallback.CallType.GET_DATA -> view.showGetDataSuccessful()
+            APIManagerCallback.CallType.LOGOUT -> onLogoutSuccessful()
+            APIManagerCallback.CallType.CONNECTION -> {
                 authManager.getActiveUser(context)?.let {
                     serviceManager.startCopyListenService(context, it)
                 }
@@ -147,7 +137,7 @@ class AppController(private val context: Activity, private val view: BaseView,
     }
 
     private fun onAckSuccessful(data: Bundle) {
-        data.getString(ClipboardServerAPICallback.CALLBACK_ID_KEY)?.let {
+        data.getString(APIManagerCallback.CALLBACK_ID_KEY)?.let {
             authManager.storeUser(it, context)
             serviceManager.startCopyListenService(context, authManager.getActiveUser(context) )
             view.showLoggedInSuccessful()
@@ -155,18 +145,18 @@ class AppController(private val context: Activity, private val view: BaseView,
     }
 
 
-    override fun onFailure(data: Bundle, type: ClipboardServerAPICallback.CallType, t: Throwable?) {
+    override fun onFailure(data: Bundle, type: APIManagerCallback.CallType, t: Throwable?) {
         t?.printStackTrace()
         when (type) {
-            ClipboardServerAPICallback.CallType.ACKNOWLEDGE -> view.showLoginFailure()
-            ClipboardServerAPICallback.CallType.SEND_DATA -> {
+            APIManagerCallback.CallType.ACKNOWLEDGE -> view.showLoginFailure()
+            APIManagerCallback.CallType.SEND_DATA -> {
                 Log.d(AppController::class.java.name, "failed to copy data from background")
                 view.showSendDataFailure()
             }
-            ClipboardServerAPICallback.CallType.SEND_FILE_DATA -> view.showSendDataFailure()
-            ClipboardServerAPICallback.CallType.GET_DATA -> view.showGetDataFailure()
-            ClipboardServerAPICallback.CallType.LOGOUT -> view.showLogoutFailure()
-            ClipboardServerAPICallback.CallType.CONNECTION -> {
+            APIManagerCallback.CallType.SEND_FILE_DATA -> view.showSendDataFailure()
+            APIManagerCallback.CallType.GET_DATA -> view.showGetDataFailure()
+            APIManagerCallback.CallType.LOGOUT -> view.showLogoutFailure()
+            APIManagerCallback.CallType.CONNECTION -> {
                 authManager.getActiveUser(context)?.let {
                     logoutUser()
                 }

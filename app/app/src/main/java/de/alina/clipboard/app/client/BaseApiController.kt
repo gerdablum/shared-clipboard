@@ -8,11 +8,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 open class BaseApiController {
     private lateinit var retrofitString: Retrofit
     private lateinit var retrofitJson: Retrofit
-    val observers: MutableList<ClipboardServerAPICallback> = mutableListOf()
 
-    fun subscribe(observer: ClipboardServerAPICallback) {
-        observers.add(observer)
-    }
     open val apiJSON: ClipboardServerAPI by lazy {
         retrofitJson.create(ClipboardServerAPI::class.java)
     }

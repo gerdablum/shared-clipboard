@@ -8,14 +8,14 @@ import android.os.Bundle
 import android.os.IBinder
 
 import android.util.Log
-import de.alina.clipboard.app.client.ClipboardServerAPICallback
+import de.alina.clipboard.app.client.APIManagerCallback
 import de.alina.clipboard.app.client.SendDataController
 import de.alina.clipboard.app.manager.ClipboardNotificationManager
 import de.alina.clipboard.app.model.User.Companion.USER_KEY
 import de.alina.clipboard.app.view.MainActivity
 import java.util.*
 
-class CopyEventService: Service(), ClipboardServerAPICallback{
+class CopyEventService: Service(), APIManagerCallback{
     lateinit var notifManager: ClipboardNotificationManager
     
     override fun onBind(intent: Intent?): IBinder? {
@@ -66,11 +66,11 @@ class CopyEventService: Service(), ClipboardServerAPICallback{
         super.onTaskRemoved(rootIntent)
     }
 
-    override fun onSuccess(data: Bundle, type: ClipboardServerAPICallback.CallType) {
+    override fun onSuccess(data: Bundle, type: APIManagerCallback.CallType) {
         Log.d("CopyEventService", "copied data from background")
     }
 
-    override fun onFailure(data: Bundle, type: ClipboardServerAPICallback.CallType, t: Throwable?) {
+    override fun onFailure(data: Bundle, type: APIManagerCallback.CallType, t: Throwable?) {
         t?.printStackTrace()
         Log.d("CopyEventService", "failed to copy data from background")
     }

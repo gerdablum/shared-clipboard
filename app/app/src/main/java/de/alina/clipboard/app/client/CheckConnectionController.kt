@@ -7,39 +7,12 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
 
-open class CheckConnectionController(): Callback<String?>, BaseApiController() {
+open class CheckConnectionController(): BaseApiController() {
 
-    fun isConnected(id: UUID) {
+    fun isConnected(id: UUID, callback: Callback<String?>) {
         val call = apiString.testConnection("clipboard.id=" + id.toString())
-        call.enqueue(this)
+        call.enqueue(callback)
         Log.d(this.toString(), "Requesting " + call.request().url())
 
-    }
-    override fun onFailure(call: Call<String?>, t: Throwable) {
-        observers.forEach() {
-            it.onFailure(Bundle(), ClipboardServerAPICallback.CallType.CONNECTION, t)
-        }
-    }
-
-    override fun onResponse(call: Call<String?>, response: Response<String?>) {
-        if (response.isSuccessful) {
-            if (response.body() == "true") {
-                observers.forEach() {
-                    it.onSuccess(Bundle(), ClipboardServerAPICallback.CallType.CONNECTION)
-                }
-            } else {
-                Log.d("TestConnectionControlle", "Connection not longer alive.")
-                observers.forEach() {
-                    it.onFailure(Bundle(), ClipboardServerAPICallback.CallType.CONNECTION, null)
-                }
-            }
-        } else {
-            val data = Bundle()
-            data.putInt(ClipboardServerAPICallback.CALLBACK_KEY_ERROR_CODE, response.code() ?: 0)
-            Log.d("TestConnectionControlle", "Server responded with response code " + response.code())
-            observers.forEach() {
-                it.onFailure(data, ClipboardServerAPICallback.CallType.CONNECTION, null)
-            }
-        }
     }
 }

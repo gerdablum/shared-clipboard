@@ -7,7 +7,7 @@ import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import de.alina.clipboard.app.model.User
 import de.alina.clipboard.app.service.CopyEventService
 
-open class ServiceManager {
+open class BackgroundServiceManager {
     fun startCopyListenService(context: Context, user: User?) {
         //TODO only start service if not already running
         if (CopyEventService.isRunning) {

@@ -3,42 +3,16 @@ package de.alina.clipboard.app.client
 import android.os.Bundle
 import android.text.Html
 import android.util.Log
-import com.google.gson.GsonBuilder
-import de.alina.clipboard.app.client.ClipboardServerAPI.Companion.BASE_URL
-import de.alina.clipboard.app.model.User
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
 
-class SendDataController(): Callback<String?>, BaseApiController(){
+class SendDataController(): BaseApiController(){
 
-    fun sendStringData(id: UUID, stringData: String) {
+    fun sendStringData(id: UUID, stringData: String, callback: Callback<String?>) {
         val call = apiJSON.sendData("clipboard.id=" + id.toString(), Html.escapeHtml(stringData))
-        call.enqueue(this)
+        call.enqueue(callback)
         Log.d(this.toString(), "Requesting " + call.request().url())
-    }
-    override fun onFailure(call: Call<String?>?, t: Throwable?) {
-        observers.forEach {
-            it.onFailure(Bundle(), ClipboardServerAPICallback.CallType.SEND_DATA, t)
-        }
-
-    }
-
-    override fun onResponse(call: Call<String?>?, response: Response<String?>?) {
-        if (response?.isSuccessful == true) {
-            observers.forEach {
-                it.onSuccess(Bundle(), ClipboardServerAPICallback.CallType.SEND_DATA)
-            }
-        } else {
-            val data = Bundle()
-            data.putInt(ClipboardServerAPICallback.CALLBACK_KEY_ERROR_CODE, response?.code() ?: 0)
-            Log.e("SendDataController", "Server responded with response code" + response?.code())
-            observers.forEach {
-                it.onFailure(data, ClipboardServerAPICallback.CallType.SEND_DATA, null)
-            }
-        }
     }
 }

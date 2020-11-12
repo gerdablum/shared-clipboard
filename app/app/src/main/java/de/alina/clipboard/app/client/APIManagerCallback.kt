@@ -1,7 +1,7 @@
 package de.alina.clipboard.app.client
 
 import android.os.Bundle
-interface ClipboardServerAPICallback {
+interface APIManagerCallback {
 
     enum class CallType {
         ACKNOWLEDGE,

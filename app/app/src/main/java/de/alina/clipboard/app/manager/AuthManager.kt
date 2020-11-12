@@ -1,11 +1,8 @@
 package de.alina.clipboard.app.manager
 
 import android.content.Context
-import android.os.Bundle
 import de.alina.clipboard.app.R
-import de.alina.clipboard.app.client.ClipboardServerAPICallback
 import de.alina.clipboard.app.model.User
-import kotlinx.coroutines.withTimeoutOrNull
 import java.lang.Exception
 import java.util.*
 

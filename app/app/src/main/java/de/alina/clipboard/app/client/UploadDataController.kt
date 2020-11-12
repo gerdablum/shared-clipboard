@@ -1,6 +1,5 @@
 package de.alina.clipboard.app.client
 
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import okhttp3.MediaType
@@ -9,38 +8,17 @@ import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.scalars.ScalarsConverterFactory
-import java.io.File
 import java.util.*
 
 
-class UploadDataController(): Callback<String?>, BaseApiController() {
+class UploadDataController(): BaseApiController() {
 
-    fun sendFileData(id: UUID, bytes: ByteArray, mimeType: MediaType, filename: String) {
+    fun sendFileData(id: UUID, bytes: ByteArray, mimeType: MediaType, filename: String,
+                     callback: Callback<String?>) {
         val file = RequestBody.create(mimeType, bytes)
         val part = MultipartBody.Part.createFormData("file", filename, file)
         val call = apiJSON.uploadData("clipboard.id=" + id.toString(), part)
-        call.enqueue(this)
+        call.enqueue(callback)
         Log.d(this.toString(), "Requesting " + call.request().url())
-    }
-    override fun onFailure(call: Call<String?>, t: Throwable) {
-        observers.forEach {
-            it.onFailure(Bundle(), ClipboardServerAPICallback.CallType.SEND_FILE_DATA, t)
-        }
-    }
-
-    override fun onResponse(call: Call<String?>, response: Response<String?>) {
-        if (response.isSuccessful) {
-            observers.forEach {
-                it.onSuccess(Bundle(), ClipboardServerAPICallback.CallType.SEND_FILE_DATA)
-            }
-
-        } else {
-            Log.e("UploadDataController", "Server responded with response code " + response.code())
-            observers.forEach {
-                it.onFailure(Bundle(), ClipboardServerAPICallback.CallType.SEND_FILE_DATA, null)
-            }
-        }
     }
 }

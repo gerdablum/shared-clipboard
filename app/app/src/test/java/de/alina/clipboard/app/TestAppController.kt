@@ -1,7 +1,6 @@
 package de.alina.clipboard.app
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import de.alina.clipboard.app.client.*
@@ -10,10 +9,7 @@ import de.alina.clipboard.app.manager.*
 import de.alina.clipboard.app.model.User
 import de.alina.clipboard.app.view.BaseView
 import org.junit.Test
-import org.mockito.Mockito
 import org.mockito.Mockito.*
-import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.Answer
 import java.util.*
 
 class TestAppController {
@@ -23,7 +19,7 @@ class TestAppController {
     private val uploadController = mock(UploadDataController::class.java)
     private val sendDataController = mock(SendDataController::class.java)
     private val authManager = mock(AuthManager::class.java)
-    private val serviceManager = mock(ServiceManager::class.java)
+    private val serviceManager = mock(BackgroundServiceManager::class.java)
     private val qrManager = mock(QRManager::class.java)
     private val notifManager = mock(ClipboardNotificationManager::class.java)
     private val fileManager = mock(FileManager::class.java)
