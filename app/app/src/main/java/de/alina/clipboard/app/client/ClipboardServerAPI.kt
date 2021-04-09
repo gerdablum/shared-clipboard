@@ -37,8 +37,9 @@ interface ClipboardServerAPI {
 
 
     companion object {
-        //const val BASE_URL = "http://100.64.3.19:8090"
-        const val BASE_URL = "http://192.168.1.57:8090/"
+       // const val BASE_URL = "http://100.64.3.33:8080"
+
+        var BASE_URL: String = "http://100.64.3.33:8080"
         //const val BASE_URL = "http://172.27.176.59:8090/"
     }
 }

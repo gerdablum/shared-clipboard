@@ -8,7 +8,9 @@ import android.os.Bundle
 import android.os.IBinder
 
 import android.util.Log
+import de.alina.clipboard.app.client.APIManager
 import de.alina.clipboard.app.client.APIManagerCallback
+import de.alina.clipboard.app.client.APIManagerImpl
 import de.alina.clipboard.app.client.SendDataController
 import de.alina.clipboard.app.manager.ClipboardNotificationManager
 import de.alina.clipboard.app.model.User.Companion.USER_KEY
@@ -33,7 +35,6 @@ class CopyEventService: Service(), APIManagerCallback{
         val id = UUID.fromString(idString)
         listenToCopyEvents(id)
         isRunning = true
-        // val cancelIntent = Intent(this, CancelServiceReceiver::class.java)
         val cancelIntent = Intent(this, MainActivity::class.java)
 
         startForeground(FOREGROUND_SERVICE_ID, notifManager.buildNotification(id, this, cancelIntent))
@@ -42,14 +43,14 @@ class CopyEventService: Service(), APIManagerCallback{
     }
 
     private fun listenToCopyEvents(id: UUID) {
-        val sendDataController = SendDataController()
-        sendDataController.subscribe(this)
+        val apiManager = APIManagerImpl()
+        apiManager.subscribe(this)
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.addPrimaryClipChangedListener {
             clipboard.primaryClip?.let {
                 val content = it.getItemAt(0)
                 if (content.text != null) {
-                    sendDataController.sendStringData(id, content.text.toString())
+                    apiManager.sendStringData(id, content.text.toString())
                 }
             }
         }

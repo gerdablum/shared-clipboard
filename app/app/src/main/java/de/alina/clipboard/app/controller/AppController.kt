@@ -25,7 +25,8 @@ class AppController(private val context: Activity, private val view: BaseView,
                     private val serviceManager: BackgroundServiceManager,
                     private val qrManager: QRManager,
                     private val notifManager: ClipboardNotificationManager,
-                    private val fileManager: FileManager) : APIManagerCallback, LifecycleObserver {
+                    private val fileManager: FileManager,
+                    private val serverManager: ServerAddressManager) : APIManagerCallback, LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
@@ -46,11 +47,11 @@ class AppController(private val context: Activity, private val view: BaseView,
             view.showLogoutSuccessful()
         }
         // user requested logout but it failed
-        else if (user != null && authManager.logoutRequested(context)) {
+        else if (authManager.logoutRequested(context)) {
             logoutUser()
         }
         // user is logged in successfully
-        else if (user != null) {
+        else {
             user.id?.let { apiController.isConnected(it) }
             view.showLoggedInSuccessful()
         }
@@ -139,7 +140,7 @@ class AppController(private val context: Activity, private val view: BaseView,
     private fun onAckSuccessful(data: Bundle) {
         data.getString(APIManagerCallback.CALLBACK_ID_KEY)?.let {
             authManager.storeUser(it, context)
-            serviceManager.startCopyListenService(context, authManager.getActiveUser(context) )
+            serviceManager.startCopyListenService(context, authManager.getActiveUser(context))
             view.showLoggedInSuccessful()
         }
     }
@@ -165,20 +166,39 @@ class AppController(private val context: Activity, private val view: BaseView,
         }
     }
 
+
     fun handleShareImageEvent(intent: Intent) {
-        if (intent.type == "text/plain") {
-            Log.d("ShareActivity", "text shared")
+        if (intent.type == null) {
+            return
         }
-        else if (intent.type.contains("image/") || intent.type == "application/pdf") {
-            (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let {
-                uploadBytes(it, MediaType.parse(intent.type)!!)
-                Log.d("MainActivity", "image shared")
-            }
+        (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let {
+            uploadBytes(it, MediaType.parse(intent.type)!!)
+            Log.d("MainActivity", "image shared")
         }
+
+    }
+
+    fun getCurrentServerAddress(): String {
+        val url = serverManager.getAddress(context)
+        if (url != ClipboardServerAPI.BASE_URL && Regex("http://.*").matches(url)) {
+            ClipboardServerAPI.BASE_URL = url
+            apiController.reload()
+        }
+        return ClipboardServerAPI.BASE_URL ?: ""
+    }
+
+    fun setCurrentServerAddress(url: String) {
+        if (!Regex("http://.*").matches(url)) {
+            view.serverUrlIncorrect()
+            return
+        }
+        ClipboardServerAPI.BASE_URL = url
+        apiController.reload()
+        serverManager.saveAddress(url, context)
     }
 
     companion object {
-        val CAPTURE_PICTURE_REQUEST = 1
+        const val CAPTURE_PICTURE_REQUEST = 1
     }
 
 }

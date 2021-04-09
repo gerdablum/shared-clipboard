@@ -1,10 +1,14 @@
 package de.alina.clipboard.app.view
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import de.alina.clipboard.app.R
 import de.alina.clipboard.app.client.*
@@ -14,6 +18,7 @@ import de.alina.clipboard.app.manager.*
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.android.synthetic.main.server_adress_main.*
 
 class MainActivity : AppCompatActivity(), BaseView {
 
@@ -23,7 +28,9 @@ class MainActivity : AppCompatActivity(), BaseView {
             BackgroundServiceManager(),
             QRManager(),
             ClipboardNotificationManager(),
-            FileManager())
+            FileManager(),
+            ServerAddressManager())
+
 
     init {
         lifecycle.addObserver(controller)
@@ -36,6 +43,17 @@ class MainActivity : AppCompatActivity(), BaseView {
         alert_image.visibility = View.INVISIBLE
         alert_text.visibility = View.INVISIBLE
         button_logout.visibility = View.INVISIBLE
+        server_adress_input_text.setText( controller.getCurrentServerAddress() ?: "")
+        server_adress_input_text.setOnEditorActionListener { v, actionId, _ ->
+            if(actionId == EditorInfo.IME_ACTION_DONE){
+                controller.setCurrentServerAddress(v.text.toString())
+                hideKeyboard(v)
+                v.clearFocus()
+                true
+            } else {
+                false
+            }
+        }
         fab.setOnClickListener { controller.captureImage() }
         button_logout.setOnClickListener {
             controller.logoutUser()
@@ -99,6 +117,10 @@ class MainActivity : AppCompatActivity(), BaseView {
         alert_text.visibility = View.VISIBLE
     }
 
+    override fun serverUrlIncorrect() {
+        // TODO: show feedback
+    }
+
     override fun showSendDataFailure() {
         Toast.makeText(this, (R.string.send_data_failed), Toast.LENGTH_LONG).show()
     }
@@ -107,6 +129,13 @@ class MainActivity : AppCompatActivity(), BaseView {
         alert_image.visibility = View.VISIBLE
         alert_text.text = getString(R.string.get_data_failed)
         alert_text.visibility = View.VISIBLE
+    }
+
+    fun hideKeyboard(editText: View) {
+        val inputManager = this.getSystemService(Activity.INPUT_METHOD_SERVICE)
+        if (inputManager is InputMethodManager) {
+            inputManager.hideSoftInputFromWindow(editText.windowToken, 0)
+        }
     }
 
     companion object {

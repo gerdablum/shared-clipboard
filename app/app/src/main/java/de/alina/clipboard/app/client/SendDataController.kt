@@ -8,7 +8,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
 
-class SendDataController(): BaseApiController(){
+class SendDataController: BaseApiController(){
 
     fun sendStringData(id: UUID, stringData: String, callback: Callback<String?>) {
         val call = apiJSON.sendData("clipboard.id=" + id.toString(), Html.escapeHtml(stringData))

@@ -18,6 +18,8 @@ interface APIManager {
 
     fun sendFileData(id: UUID, bytes: ByteArray, mimeType: MediaType, filename: String)
 
+    fun reload()
+
     companion object {
         const val CALLBACK_ID_KEY = "de.alina.clipboard.app.callbackId"
         const val CALLBACK_KEY_ERROR_CODE = "de.alina.clipboard.app.callbackErrorCode"
@@ -25,4 +27,5 @@ interface APIManager {
     }
 
     fun subscribe(observer: APIManagerCallback)
+
 }

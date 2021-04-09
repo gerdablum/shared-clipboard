@@ -12,4 +12,5 @@ interface BaseView {
     fun showGetDataSuccessful()
     fun showGetDataFailure()
     fun showFailure()
+    fun serverUrlIncorrect()
 }

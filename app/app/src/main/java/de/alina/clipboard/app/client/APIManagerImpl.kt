@@ -14,12 +14,12 @@ import java.util.*
 
 class APIManagerImpl: APIManager {
 
-    private val ackController = AcknowledgeController()
-    private val connectionController = CheckConnectionController()
-    private val getDataController = GetDataController()
-    private val logoutController = LogoutController()
-    private val sendDataController = SendDataController()
-    private val uploadDataController = UploadDataController();
+    private var ackController = AcknowledgeController()
+    private var connectionController = CheckConnectionController()
+    private var getDataController = GetDataController()
+    private var logoutController = LogoutController()
+    private var sendDataController = SendDataController()
+    private var uploadDataController = UploadDataController();
 
     val observers: MutableList<APIManagerCallback> = mutableListOf()
 
@@ -108,13 +108,13 @@ class APIManagerImpl: APIManager {
         logoutController.logout(id, object : Callback<String?> {
 
             override fun onFailure(call: Call<String?>, t: Throwable) {
-                handleOnFailure(APIManagerCallback.CallType.GET_DATA, t)
+                handleOnFailure(APIManagerCallback.CallType.LOGOUT, t)
             }
 
             override fun onResponse(call: Call<String?>, response: Response<String?>) {
                 if (response.isSuccessful) {
                     observers.forEach {
-                        it.onSuccess(Bundle(), APIManagerCallback.CallType.GET_DATA)
+                        it.onSuccess(Bundle(), APIManagerCallback.CallType.LOGOUT)
                     }
                 } else {
                     respondToError(response.code(), "LogoutController", APIManagerCallback.CallType.LOGOUT)
@@ -159,6 +159,15 @@ class APIManagerImpl: APIManager {
                 }
             }
         })
+    }
+
+    override fun reload() {
+        ackController = AcknowledgeController()
+        connectionController = CheckConnectionController()
+        getDataController = GetDataController()
+        logoutController = LogoutController()
+        sendDataController = SendDataController()
+        uploadDataController = UploadDataController();
     }
 
     private fun respondToError(responseCode: Int, className: String, type: APIManagerCallback.CallType) {

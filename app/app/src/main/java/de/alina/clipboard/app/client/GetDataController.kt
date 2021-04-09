@@ -10,7 +10,7 @@ import retrofit2.Response
 import java.util.*
 
 
-class GetDataController():  BaseApiController() {
+class GetDataController:  BaseApiController() {
 
     fun getData(id: UUID, callback: Callback<User?>) {
         val call = apiJSON.getData("clipboard.id=" + id.toString())

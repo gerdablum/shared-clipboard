@@ -2,11 +2,12 @@ package de.alina.clipboard.app.manager
 
 import android.content.Context
 import de.alina.clipboard.app.R
+import de.alina.clipboard.app.client.APIManager
 import de.alina.clipboard.app.model.User
 import java.lang.Exception
 import java.util.*
 
-open class AuthManager {
+open class AuthManager() {
 
     private var user: User? = null
 

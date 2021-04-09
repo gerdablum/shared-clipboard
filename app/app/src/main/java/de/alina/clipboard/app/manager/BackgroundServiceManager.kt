@@ -9,7 +9,6 @@ import de.alina.clipboard.app.service.CopyEventService
 
 open class BackgroundServiceManager {
     fun startCopyListenService(context: Context, user: User?) {
-        //TODO only start service if not already running
         if (CopyEventService.isRunning) {
             return
         }

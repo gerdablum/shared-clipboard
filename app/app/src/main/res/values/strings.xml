@@ -15,4 +15,6 @@
     <string name="channel_description">Notify about the connection status.</string>
     <string name="cancel_service">disconnect</string>
     <string name="user_auth_request_logout_key">de.alina.clipboard.app.logoutRequested</string>
+    <string name="server_adress">Server Adress is:</string>
+    <string name="server_url_key">de.alina.clipboard.app.sharedpreferences.serverUrl</string>
 </resources>
