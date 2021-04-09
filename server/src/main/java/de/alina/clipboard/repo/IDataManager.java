@@ -20,6 +20,6 @@ public interface IDataManager {
 
     String USER_ID = "de.alina.clipboard.userid";
     String TYPE = "de.alina.clipboard.type";
-    String UPLOADED_FOLDER = "/home/pi/server/";
+    String UPLOADED_FOLDER = "./files/";
     int SESSION_TIMEOUT = 10;
 }

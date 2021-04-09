@@ -27,23 +27,23 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    compile("org.springframework.boot:spring-boot-starter-web")
-    compile 'com.github.kenglxn.QRGen:javase:2.5.0'
-    compile group: 'org.springframework.data', name: 'spring-data-redis', version: '2.2.5.RELEASE'
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis', version: '2.2.5.RELEASE'
-    compile group: 'redis.clients', name: 'jedis', version: '3.2.0'
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-websocket', version: '2.2.5.RELEASE'
-    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
-    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
-    compile("org.webjars:webjars-locator-core")
-    compile("org.webjars:sockjs-client:1.0.2")
-    compile("org.webjars:stomp-websocket:2.3.3")
-    compile ("org.webjars:bootstrap:4.4.1")
-    compile( 'com.google.code.gson:gson:2.8.6')
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation 'com.github.kenglxn.QRGen:javase:2.5.0'
+    implementation group: 'org.springframework.data', name: 'spring-data-redis', version: '2.2.5.RELEASE'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis', version: '2.2.5.RELEASE'
+    implementation group: 'redis.clients', name: 'jedis', version: '3.2.0'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-websocket', version: '2.2.5.RELEASE'
+    implementation group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
+    implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
+    implementation("org.webjars:webjars-locator-core")
+    implementation("org.webjars:sockjs-client:1.0.2")
+    implementation("org.webjars:stomp-websocket:2.3.3")
+    implementation("org.webjars:bootstrap:4.4.1")
+    implementation( 'com.google.code.gson:gson:2.8.6')
 
-    testCompile("junit:junit:4.12")
-    testCompile('org.springframework.boot:spring-boot-starter-test')
-    testCompile('org.junit.jupiter:junit-jupiter:5.4.0')
+    testImplementation("junit:junit:4.12")
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
+    testImplementation('org.junit.jupiter:junit-jupiter:5.4.0')
     implementation 'org.testng:testng:7.1.0'
     implementation 'junit:junit:4.12'
     implementation 'junit:junit:4.12'

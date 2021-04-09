@@ -154,6 +154,9 @@ public class DataManager implements IDataManager {
 
     private void deleteAllFiles(UUID userID) {
         File folder = new File(UPLOADED_FOLDER);
+        if (folder.listFiles() == null) {
+            return;
+        }
         List<File> listOfFiles = Arrays.asList(folder.listFiles());
         listOfFiles.forEach(file -> {
             if (file.getName().contains(userID.toString())) {
