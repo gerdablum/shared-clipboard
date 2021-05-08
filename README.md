@@ -14,7 +14,7 @@ This project consists of two applications:
 
 ## Setup
 1. start redis via command line `redis-server`
-2. in server project folder start the spring boot application by typing `gradlew bootRun`into the command line
+2. in server project folder start the spring boot application by typing `./gradlew bootRun`into the command line
 3. Deploy the app to your smarthpone via Android Studio
 
 ## How it works
