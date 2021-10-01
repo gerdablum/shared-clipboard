@@ -13,7 +13,7 @@ class ServerAddressManager {
 
     }
 
-    fun getAddress(context: Context): String {
+    fun getAddress(context: Context): String? {
         val sharedPref = context.getSharedPreferences(
                 context.getString(R.string.preference_file_key), Context.MODE_PRIVATE)
         return sharedPref.getString(context.getString(R.string.server_url_key), "")

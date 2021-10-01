@@ -13,9 +13,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import android.provider.MediaStore
+import android.service.autofill.UserData
 import android.util.Log
 import de.alina.clipboard.app.client.*
 import de.alina.clipboard.app.manager.*
+import de.alina.clipboard.app.model.User
+import de.alina.clipboard.app.model.UserFileData
 import de.alina.clipboard.app.view.BaseView
 import okhttp3.MediaType
 
@@ -27,6 +30,13 @@ class AppController(private val context: Activity, private val view: BaseView,
                     private val notifManager: ClipboardNotificationManager,
                     private val fileManager: FileManager,
                     private val serverManager: ServerAddressManager) : APIManagerCallback, LifecycleObserver {
+
+    var user: User? = null
+    var hasInternetConnection = true
+    var textData: UserData? = null
+    var fileDate: UserFileData? = null
+
+
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
@@ -180,11 +190,11 @@ class AppController(private val context: Activity, private val view: BaseView,
 
     fun getCurrentServerAddress(): String {
         val url = serverManager.getAddress(context)
-        if (url != ClipboardServerAPI.BASE_URL && Regex("http://.*").matches(url)) {
+        if (url != null && url != ClipboardServerAPI.BASE_URL && Regex("http://.*").matches(url)) {
             ClipboardServerAPI.BASE_URL = url
             apiController.reload()
         }
-        return ClipboardServerAPI.BASE_URL ?: ""
+        return ClipboardServerAPI.BASE_URL
     }
 
     fun setCurrentServerAddress(url: String) {
